@@ -1,9 +1,11 @@
+;;; plantuml-mode.el -- Major mode for plantuml diagrams -*- lexical-binding: t -*-
+
 ;;; Customizable variables
 (defgroup plantuml-mode nil
   "Major mode for plantuml" :group
   'languages)
 
-(defcustom plantuml-java-cm "java"
+(defcustom plantuml-java-cmd "java"
   "Path to java executable"
   :type 'string
   :group 'plantuml)
@@ -13,10 +15,39 @@
   :type 'string
   :group 'plantuml)
 
+(defun plantuml--default-preview-program ()
+  (pcase system-type
+    ('windows-nt "msphotos")
+    ('darwin "/usr/bin/open")
+    ('ms-dos "mspaint")
+    (_ "/usr/bin/eog")))
+
+(defcustom plantuml-preview-program (plantuml--default-preview-program)
+  "Program to use for opening preview files"
+  :type 'string
+  :options '(mspaint msphotos)
+  :group 'plantuml)
+
+(defcustom plantuml-force-save-before-preview t
+  "Save file before generating preview"
+  :type 'boolean
+  :group 'plantuml)
+
+(defcustom plantuml-show-failed-preview t
+  "Show the failed preview image with error message"
+  :type 'boolean
+  :group 'plantuml)
+
+(defcustom plantuml-close-compilation-buffer 5
+  "Number of secods after which preview compilation buffer will be killed"
+  :type 'integer
+  :group 'plantuml)
+
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "C-c C-c") #'plantuml-preview)
+    (define-key keymap (kbd "C-c C-c") #'plantuml-compile)
+    (define-key keymap (kbd "C-c C-p") #'plantuml-preview)
     (define-key keymap (kbd "C-c C-o") #'plantuml-open-preview)
     (define-key keymap (kbd "C-c !") #'plantuml-select-diagram)
     keymap))
@@ -31,6 +62,20 @@
 (modify-syntax-entry ?\n ">" plantuml-mode-syntax-table)
 
 ;;; constants
+(defconst plantuml--output-file-extensions '(png cmapx)
+  "File extensions of files generated when exporting plantuml diagrams")
+
+(defconst plantuml--deployment-elements
+  '(component database rectangle artifact frame actor interface file
+  folder package agent boundary card circle cloud collections control
+  entity hexagon label node queue stack storage usecase)
+  "Elements in a deployment diagram")
+
+(defconst plantuml--sequence-elements
+  '(participant actor database collections boundary control entity
+  queue)
+  "Elements in a sequence diagram")
+
 ;; diagram types
 (defconst plantuml-diagram-types
   '(("u" "UML Diagram" "uml")
@@ -191,7 +236,7 @@
     ("whitesmoke" . "#f5f5f5")
     ("yellow" . "#ffff00")
     ("yellowgreen" . "#9acd32"))
-  "Platnuml predefined colors")
+  "Plantuml predefined colors")
 
 
 (defconst plantuml--color-names
@@ -199,7 +244,8 @@
   "Plantuml color names only")
 
 (defun plantuml--find-color (color)
-  "Find hex color code for named color (strips prefix # if present) or if in the form of #ffffff return that"
+  "Find hex color code for named color (strips prefix # if present)
+or if in the form of #ffffff return that"
   (if (string-match-p "#[[:digit:]]\\{6\\}" color)
       color
     (let ((name (replace-regexp-in-string "^#" "" color)))
@@ -209,11 +255,11 @@
 ;; 'java -jar plantuml.jar -language'
 (defconst plantuml--component-types
   '("abstract" "actor" "agent" "annotation" "archimate" "artifact"
-    "boundary" "card" "class" "cloud" "collections" "component" "control"
-    "database" "diamond" "entity" "enum" "file" "folder" "frame" "hexagon"
-    "interface" "label" "node" "object" "package" "participant" "person"
-    "queue" "rectangle" "stack" "state" "storage"
-    "usecase" )
+    "boundary" "card" "class" "cloud" "collections" "component"
+    "control" "database" "diamond" "entity" "enum" "file" "folder"
+    "frame" "hexagon" "interface" "label" "node" "object" "package"
+    "participant" "person" "queue" "rectangle" "stack" "state"
+    "storage" "usecase" )
   "Plantuml component types"
   )
 
@@ -229,8 +275,7 @@
     "center" "circle" "color" "create" "critical" "dashed"
     "deactivate" "description" "destroy" "detach" "dotted" "down"
     "else" "elseif" "empty" "end" "endif" "endwhile" "false" "footbox"
-    "footer" "fork" "group"
-    "header" "hide" "hnote" "if" "is" "italic"
+    "footer" "fork" "group" "header" "hide" "hnote" "if" "is" "italic"
     "kill" "left" "left to right direction" "legend" "link" "loop"
     "mainframe" "map" "members" "namespace" "newpage" "normal" "note"
     "of" "on" "opt" "order" "over" "package" "page" "par" "partition"
@@ -246,57 +291,59 @@
     "ActivityDiamondFontName" "ActivityDiamondFontSize"
     "ActivityDiamondFontStyle" "ActivityFontColor" "ActivityFontName"
     "ActivityFontSize" "ActivityFontStyle" "ActorBackgroundColor"
-    "ActorBorderColor" "ActorFontColor" "ActorFontName" "ActorFontSize"
-    "ActorFontStyle" "ActorStereotypeFontColor"
+    "ActorBorderColor" "ActorFontColor" "ActorFontName"
+    "ActorFontSize" "ActorFontStyle" "ActorStereotypeFontColor"
     "ActorStereotypeFontName" "ActorStereotypeFontSize"
     "ActorStereotypeFontStyle" "AgentBorderThickness" "AgentFontColor"
     "AgentFontName" "AgentFontSize" "AgentFontStyle"
     "AgentStereotypeFontColor" "AgentStereotypeFontName"
     "AgentStereotypeFontSize" "AgentStereotypeFontStyle"
-    "ArchimateBorderThickness" "ArchimateFontColor" "ArchimateFontName"
-    "ArchimateFontSize" "ArchimateFontStyle"
+    "ArchimateBorderThickness" "ArchimateFontColor"
+    "ArchimateFontName" "ArchimateFontSize" "ArchimateFontStyle"
     "ArchimateStereotypeFontColor" "ArchimateStereotypeFontName"
     "ArchimateStereotypeFontSize" "ArchimateStereotypeFontStyle"
     "ArrowFontColor" "ArrowFontName" "ArrowFontSize" "ArrowFontStyle"
     "ArrowHeadColor" "ArrowLollipopColor" "ArrowMessageAlignment"
     "ArrowThickness" "ArtifactFontColor" "ArtifactFontName"
-    "ArtifactFontSize" "ArtifactFontStyle" "ArtifactStereotypeFontColor"
-    "ArtifactStereotypeFontName" "ArtifactStereotypeFontSize"
-    "ArtifactStereotypeFontStyle" "BackgroundColor"
-    "BiddableBackgroundColor" "BiddableBorderColor" "BoundaryFontColor"
-    "BoundaryFontName" "BoundaryFontSize" "BoundaryFontStyle"
-    "BoundaryStereotypeFontColor" "BoundaryStereotypeFontName"
-    "BoundaryStereotypeFontSize" "BoundaryStereotypeFontStyle"
-    "BoxPadding" "CaptionFontColor" "CaptionFontName" "CaptionFontSize"
-    "CaptionFontStyle" "CardBorderThickness" "CardFontColor"
-    "CardFontName" "CardFontSize" "CardFontStyle"
-    "CardStereotypeFontColor" "CardStereotypeFontName"
-    "CardStereotypeFontSize" "CardStereotypeFontStyle"
-    "CircledCharacterFontColor" "CircledCharacterFontName"
-    "CircledCharacterFontSize" "CircledCharacterFontStyle"
-    "CircledCharacterRadius" "ClassAttributeFontColor"
-    "ClassAttributeFontName" "ClassAttributeFontSize"
-    "ClassAttributeFontStyle" "ClassAttributeIconSize"
-    "ClassBackgroundColor" "ClassBorderColor" "ClassBorderThickness"
-    "ClassFontColor" "ClassFontName" "ClassFontSize" "ClassFontStyle"
-    "ClassStereotypeFontColor" "ClassStereotypeFontName"
-    "ClassStereotypeFontSize" "ClassStereotypeFontStyle"
-    "CloudFontColor" "CloudFontName" "CloudFontSize" "CloudFontStyle"
-    "CloudStereotypeFontColor" "CloudStereotypeFontName"
-    "CloudStereotypeFontSize" "CloudStereotypeFontStyle"
-    "ColorArrowSeparationSpace" "ComponentBorderThickness"
-    "ComponentFontColor" "ComponentFontName" "ComponentFontSize"
-    "ComponentFontStyle" "ComponentStereotypeFontColor"
-    "ComponentStereotypeFontName" "ComponentStereotypeFontSize"
-    "ComponentStereotypeFontStyle" "ComponentStyle" "ConditionEndStyle"
-    "ConditionStyle" "ControlFontColor" "ControlFontName"
-    "ControlFontSize" "ControlFontStyle" "ControlStereotypeFontColor"
+    "ArtifactFontSize" "ArtifactFontStyle"
+    "ArtifactStereotypeFontColor" "ArtifactStereotypeFontName"
+    "ArtifactStereotypeFontSize" "ArtifactStereotypeFontStyle"
+    "BackgroundColor" "BiddableBackgroundColor" "BiddableBorderColor"
+    "BoundaryFontColor" "BoundaryFontName" "BoundaryFontSize"
+    "BoundaryFontStyle" "BoundaryStereotypeFontColor"
+    "BoundaryStereotypeFontName" "BoundaryStereotypeFontSize"
+    "BoundaryStereotypeFontStyle" "BoxPadding" "CaptionFontColor"
+    "CaptionFontName" "CaptionFontSize" "CaptionFontStyle"
+    "CardBorderThickness" "CardFontColor" "CardFontName"
+    "CardFontSize" "CardFontStyle" "CardStereotypeFontColor"
+    "CardStereotypeFontName" "CardStereotypeFontSize"
+    "CardStereotypeFontStyle" "CircledCharacterFontColor"
+    "CircledCharacterFontName" "CircledCharacterFontSize"
+    "CircledCharacterFontStyle" "CircledCharacterRadius"
+    "ClassAttributeFontColor" "ClassAttributeFontName"
+    "ClassAttributeFontSize" "ClassAttributeFontStyle"
+    "ClassAttributeIconSize" "ClassBackgroundColor" "ClassBorderColor"
+    "ClassBorderThickness" "ClassFontColor" "ClassFontName"
+    "ClassFontSize" "ClassFontStyle" "ClassStereotypeFontColor"
+    "ClassStereotypeFontName" "ClassStereotypeFontSize"
+    "ClassStereotypeFontStyle" "CloudFontColor" "CloudFontName"
+    "CloudFontSize" "CloudFontStyle" "CloudStereotypeFontColor"
+    "CloudStereotypeFontName" "CloudStereotypeFontSize"
+    "CloudStereotypeFontStyle" "ColorArrowSeparationSpace"
+    "ComponentBorderThickness" "ComponentFontColor"
+    "ComponentFontName" "ComponentFontSize" "ComponentFontStyle"
+    "ComponentStereotypeFontColor" "ComponentStereotypeFontName"
+    "ComponentStereotypeFontSize" "ComponentStereotypeFontStyle"
+    "ComponentStyle" "ConditionEndStyle" "ConditionStyle"
+    "ControlFontColor" "ControlFontName" "ControlFontSize"
+    "ControlFontStyle" "ControlStereotypeFontColor"
     "ControlStereotypeFontName" "ControlStereotypeFontSize"
-    "ControlStereotypeFontStyle" "DatabaseFontColor" "DatabaseFontName"
-    "DatabaseFontSize" "DatabaseFontStyle" "DatabaseStereotypeFontColor"
-    "DatabaseStereotypeFontName" "DatabaseStereotypeFontSize"
-    "DatabaseStereotypeFontStyle" "DefaultFontColor" "DefaultFontName"
-    "DefaultFontSize" "DefaultFontStyle" "DefaultMonospacedFontName"
+    "ControlStereotypeFontStyle" "DatabaseFontColor"
+    "DatabaseFontName" "DatabaseFontSize" "DatabaseFontStyle"
+    "DatabaseStereotypeFontColor" "DatabaseStereotypeFontName"
+    "DatabaseStereotypeFontSize" "DatabaseStereotypeFontStyle"
+    "DefaultFontColor" "DefaultFontName" "DefaultFontSize"
+    "DefaultFontStyle" "DefaultMonospacedFontName"
     "DefaultTextAlignment" "DesignedBackgroundColor"
     "DesignedBorderColor" "DesignedDomainBorderThickness"
     "DesignedDomainFontColor" "DesignedDomainFontName"
@@ -305,12 +352,13 @@
     "DesignedDomainStereotypeFontName"
     "DesignedDomainStereotypeFontSize"
     "DesignedDomainStereotypeFontStyle" "DiagramBorderColor"
-    "DiagramBorderThickness" "DomainBackgroundColor" "DomainBorderColor"
-    "DomainBorderThickness" "DomainFontColor" "DomainFontName"
-    "DomainFontSize" "DomainFontStyle" "DomainStereotypeFontColor"
-    "DomainStereotypeFontName" "DomainStereotypeFontSize"
-    "DomainStereotypeFontStyle" "Dpi" "EntityFontColor" "EntityFontName"
-    "EntityFontSize" "EntityFontStyle" "EntityStereotypeFontColor"
+    "DiagramBorderThickness" "DomainBackgroundColor"
+    "DomainBorderColor" "DomainBorderThickness" "DomainFontColor"
+    "DomainFontName" "DomainFontSize" "DomainFontStyle"
+    "DomainStereotypeFontColor" "DomainStereotypeFontName"
+    "DomainStereotypeFontSize" "DomainStereotypeFontStyle" "Dpi"
+    "EntityFontColor" "EntityFontName" "EntityFontSize"
+    "EntityFontStyle" "EntityStereotypeFontColor"
     "EntityStereotypeFontName" "EntityStereotypeFontSize"
     "EntityStereotypeFontStyle" "FileFontColor" "FileFontName"
     "FileFontSize" "FileFontStyle" "FileStereotypeFontColor"
@@ -320,18 +368,18 @@
     "FolderFontStyle" "FolderStereotypeFontColor"
     "FolderStereotypeFontName" "FolderStereotypeFontSize"
     "FolderStereotypeFontStyle" "FooterFontColor" "FooterFontName"
-    "FooterFontSize" "FooterFontStyle" "FrameFontColor" "FrameFontName"
-    "FrameFontSize" "FrameFontStyle" "FrameStereotypeFontColor"
-    "FrameStereotypeFontName" "FrameStereotypeFontSize"
-    "FrameStereotypeFontStyle" "GenericDisplay" "Guillemet"
-    "Handwritten" "HeaderFontColor" "HeaderFontName" "HeaderFontSize"
-    "HeaderFontStyle" "HexagonBorderThickness" "HexagonFontColor"
-    "HexagonFontName" "HexagonFontSize" "HexagonFontStyle"
-    "HexagonStereotypeFontColor" "HexagonStereotypeFontName"
-    "HexagonStereotypeFontSize" "HexagonStereotypeFontStyle"
-    "HyperlinkColor" "HyperlinkUnderline" "IconIEMandatoryColor"
-    "IconPackageBackgroundColor" "IconPackageColor"
-    "IconPrivateBackgroundColor" "IconPrivateColor"
+    "FooterFontSize" "FooterFontStyle" "FrameFontColor"
+    "FrameFontName" "FrameFontSize" "FrameFontStyle"
+    "FrameStereotypeFontColor" "FrameStereotypeFontName"
+    "FrameStereotypeFontSize" "FrameStereotypeFontStyle"
+    "GenericDisplay" "Guillemet" "Handwritten" "HeaderFontColor"
+    "HeaderFontName" "HeaderFontSize" "HeaderFontStyle"
+    "HexagonBorderThickness" "HexagonFontColor" "HexagonFontName"
+    "HexagonFontSize" "HexagonFontStyle" "HexagonStereotypeFontColor"
+    "HexagonStereotypeFontName" "HexagonStereotypeFontSize"
+    "HexagonStereotypeFontStyle" "HyperlinkColor" "HyperlinkUnderline"
+    "IconIEMandatoryColor" "IconPackageBackgroundColor"
+    "IconPackageColor" "IconPrivateBackgroundColor" "IconPrivateColor"
     "IconProtectedBackgroundColor" "IconProtectedColor"
     "IconPublicBackgroundColor" "IconPublicColor" "InterfaceFontColor"
     "InterfaceFontName" "InterfaceFontSize" "InterfaceFontStyle"
@@ -356,30 +404,32 @@
     "NoteFontColor" "NoteFontName" "NoteFontSize" "NoteFontStyle"
     "NoteShadowing" "NoteTextAlignment" "ObjectAttributeFontColor"
     "ObjectAttributeFontName" "ObjectAttributeFontSize"
-    "ObjectAttributeFontStyle" "ObjectBorderThickness" "ObjectFontColor"
-    "ObjectFontName" "ObjectFontSize" "ObjectFontStyle"
-    "ObjectStereotypeFontColor" "ObjectStereotypeFontName"
-    "ObjectStereotypeFontSize" "ObjectStereotypeFontStyle"
-    "PackageBorderThickness" "PackageFontColor" "PackageFontName"
-    "PackageFontSize" "PackageFontStyle" "PackageStereotypeFontColor"
+    "ObjectAttributeFontStyle" "ObjectBorderThickness"
+    "ObjectFontColor" "ObjectFontName" "ObjectFontSize"
+    "ObjectFontStyle" "ObjectStereotypeFontColor"
+    "ObjectStereotypeFontName" "ObjectStereotypeFontSize"
+    "ObjectStereotypeFontStyle" "PackageBorderThickness"
+    "PackageFontColor" "PackageFontName" "PackageFontSize"
+    "PackageFontStyle" "PackageStereotypeFontColor"
     "PackageStereotypeFontName" "PackageStereotypeFontSize"
-    "PackageStereotypeFontStyle" "PackageStyle" "PackageTitleAlignment"
-    "Padding" "PageBorderColor" "PageExternalColor" "PageMargin"
-    "ParticipantFontColor" "ParticipantFontName" "ParticipantFontSize"
-    "ParticipantFontStyle" "ParticipantPadding"
-    "ParticipantStereotypeFontColor" "ParticipantStereotypeFontName"
-    "ParticipantStereotypeFontSize" "ParticipantStereotypeFontStyle"
-    "PartitionBorderThickness" "PartitionFontColor" "PartitionFontName"
-    "PartitionFontSize" "PartitionFontStyle" "PathHoverColor"
-    "PersonBorderThickness" "PersonFontColor" "PersonFontName"
-    "PersonFontSize" "PersonFontStyle" "PersonStereotypeFontColor"
+    "PackageStereotypeFontStyle" "PackageStyle"
+    "PackageTitleAlignment" "Padding" "PageBorderColor"
+    "PageExternalColor" "PageMargin" "ParticipantFontColor"
+    "ParticipantFontName" "ParticipantFontSize" "ParticipantFontStyle"
+    "ParticipantPadding" "ParticipantStereotypeFontColor"
+    "ParticipantStereotypeFontName" "ParticipantStereotypeFontSize"
+    "ParticipantStereotypeFontStyle" "PartitionBorderThickness"
+    "PartitionFontColor" "PartitionFontName" "PartitionFontSize"
+    "PartitionFontStyle" "PathHoverColor" "PersonBorderThickness"
+    "PersonFontColor" "PersonFontName" "PersonFontSize"
+    "PersonFontStyle" "PersonStereotypeFontColor"
     "PersonStereotypeFontName" "PersonStereotypeFontSize"
-    "PersonStereotypeFontStyle" "QueueBorderThickness" "QueueFontColor"
-    "QueueFontName" "QueueFontSize" "QueueFontStyle"
+    "PersonStereotypeFontStyle" "QueueBorderThickness"
+    "QueueFontColor" "QueueFontName" "QueueFontSize" "QueueFontStyle"
     "QueueStereotypeFontColor" "QueueStereotypeFontName"
     "QueueStereotypeFontSize" "QueueStereotypeFontStyle" "Ranksep"
-    "RectangleBorderThickness" "RectangleFontColor" "RectangleFontName"
-    "RectangleFontSize" "RectangleFontStyle"
+    "RectangleBorderThickness" "RectangleFontColor"
+    "RectangleFontName" "RectangleFontSize" "RectangleFontStyle"
     "RectangleStereotypeFontColor" "RectangleStereotypeFontName"
     "RectangleStereotypeFontSize" "RectangleStereotypeFontStyle"
     "RequirementBackgroundColor" "RequirementBorderColor"
@@ -624,19 +674,129 @@
    plantuml--font-lock-creole-strikethrough
    ))
 
+(require 'compile)
 ;;;###autoload
 (define-derived-mode plantuml-mode
   prog-mode "plantuml" "Major mode for plantuml"
   (setq
-   font-lock-defaults '((plantuml--font-lock-defaults) nil t)
-   plantuml-java-cmd (get-java-cmd)
-   plantuml-jar-path (get-plantuml-jar))
+   font-lock-defaults '((plantuml--font-lock-defaults) nil t))
+  (unless (executable-find plantuml-java-cmd)
+    (setq plantuml-java-cmd (get-java-cmd)))
+
+  (unless (file-exists-p plantuml-jar-path)
+    (setq plantuml-jar-path (get-plantuml-jar)))
+
   (font-lock-add-keywords 'plantuml-mode plantuml--font-lock-mindmap-headers)
   (add-hook 'xref-backend-functions #'plantuml-xref-backend)
   )
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
+
+(require 'compile)
+;;;###autoload
+(let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
+  (add-to-list 'compilation-error-regexp-alist (car form))
+  (add-to-list 'compilation-error-regexp-alist-alist form)
+  (add-to-list 'compilation-finish-functions #'plantuml--compile-close))
+
+;;; compilation helpers
+(defun plantuml--kill-inactive (buffer)
+  (unless (equal (window-buffer) buffer)
+	  (when-let ((bw (seq-find (lambda (w) (equal buffer (window-buffer w))) (window-list))))
+	    (delete-window bw))
+	  (kill-buffer buffer)))
+
+(defun plantuml--compile-close (buffer status)
+  (when (string-prefix-p "*plantuml-" (buffer-name buffer))
+    (run-with-timer plantuml-close-compilation-buffer nil #'plantuml--kill-inactive buffer))
+  (let ((file (buffer-local-value 'source-buffer-file buffer))
+	(bufname (buffer-name buffer)))
+    (when (and (string= "finished\n" status)
+	       (string-prefix-p "*plantuml-open" bufname))
+      (plantuml--open-preview-program (concat (file-name-sans-extension file) ".png")))))
+
+(defun plantuml--compilation-command (action)
+  (pcase action
+    ("compile" #'plantuml--compile-command)
+    (_ #'plantuml--preview-command)))
+
+(defun plantuml--compile-command (file)
+  (string-join
+   (list
+    (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+    "-jar" (shell-quote-argument plantuml-jar-path)
+    "-failfast" file)
+   " "))
+
+(defun plantuml--preview-command (file)
+  (string-join
+   (list
+    (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+    "-jar" (shell-quote-argument plantuml-jar-path)
+    "-tpng" "-failfast" file)
+   " "))
+
+(defmacro plantuml--compilation-buffer-name (action)
+  `(lambda (_) (format "*plantuml-%s*" ,action)))
+
+(defun plantuml--open-preview-program (filename)
+  "Launch preview program to preview generated png file"
+  (let ((default-directory (file-name-directory filename))
+	(target-file (file-name-nondirectory filename))
+	(buffer-name "*plantuml-open-preview*"))
+    (if (string-equal plantuml-preview-program "msphotos")
+	(start-process buffer-name nil "cmd.exe" "/c" "start" "" target-file)
+      (start-process buffer-name nil plantuml-preview-program target-file))))
+
+(defun plantuml--run-compile (action)
+  "Run specified compilation action to display compilation buffer"
+  ;;save
+  (when plantuml-force-save-before-preview
+    (save-buffer))
+  (let* ((filename (buffer-file-name))
+	 (file (file-name-nondirectory filename))
+	 (default-directory (file-name-directory filename))
+	 (name-fn (plantuml--compilation-buffer-name action)))
+    (with-current-buffer
+	(compilation-start
+	 (funcall (plantuml--compilation-command action) file)
+	 'compilation-mode
+	 name-fn
+	 t)
+      (setq-local source-buffer-file (expand-file-name file default-directory)))))
+
+(defun plantuml-compile ()
+  "Compile plantuml diagram to display syntax errors"
+  (interactive)
+  (plantuml--run-compile "compile"))
+
+(defun plantuml-preview ()
+  "Generate plantuml diagram preview png. Use with universal
+argument (C-u) to clear existing preview output files"
+  (interactive)
+  (when current-prefix-arg
+    (plantuml--clear-outputs (buffer-file-name)))
+  (plantuml--run-compile "preview"))
+
+(defun plantuml-open-preview ()
+  "Generate plantuml diagram preview png. Use with universal
+argument (C-u) to clear existing preview output files"
+  (interactive)
+  (when current-prefix-arg
+    (plantuml--clear-outputs (buffer-file-name)))
+  (plantuml--run-compile "open-preview"))
+
+(defun plantuml--preview-candidate-files (base)
+  (mapcar (lambda (ext) (concat base "." ext)) plantuml--output-file-extensions))
+
+(defun plantuml--delete-if-exists (file)
+  (when (file-exists-p file)
+    (delete-file file)))
+
+(defun plantuml--clear-outputs (file)
+  (let ((candidates (plantuml--preview-candidate-files (file-name-sans-extension file))))
+    (mapc #'plantuml--delete-if-exists candidates)))
 
 ;;; preview helper functions
 (defun get-java-cmd ()
@@ -645,9 +805,10 @@ JAVA HOME environment variable is set"
   (expand-file-name
    "bin/java"
    (let ((java-home (getenv "JAVA_HOME" )))
-     (when (string-prefix-p "%" java-home)
-       (getenv (replace-regexp-in-string "%" "" java-home)))
-     )))
+     (if (string-prefix-p "%" java-home)
+	 (getenv (replace-regexp-in-string "%" "" java-home))
+     java-home
+     ))))
 
 (require 'seq)
 (defun get-plantuml-jar ()
@@ -662,53 +823,6 @@ in the $APPS_HOME/plantuml folder"
 			  (directory-files plantuml-home)))))
       (when plantuml-jar
 	(expand-file-name plantuml-jar plantuml-home)))))
-
-(defun plantuml--preview-process (filename)
-  "Launch process to generate preview and return the running
-process"
-  (let ((default-directory (file-name-directory filename))
-	(basename (file-name-nondirectory filename)))
-    (start-process
-     "*plantuml*" "*plantuml*" plantum-java-cmd
-     "-jar" plantuml-jar-path basename)))
-
-(defun plantuml--preview-process-sentinel (proc event)
-  "Sentinel function to print status of preview process"
-  (if (equal "finished\n" event)
-      (message "Generated preview successfully")
-    (user-error "Generating preview failed")))
-
-(defun plantuml-preview ()
-  "Spawn a process to generate png preview file. Use with universal
-argument (C-u) to remove any existing preview png file."
-  (interactive)
-  (when current-prefix-arg
-    (let ((preview-file
-	   (expand-file-name
-	    (concat (file-name-base (buffer-file-name)) ".png")
-	    (file-name-directory (buffer-file-name)))))
-      (when (file-exists-p preview-file)
-	(delete-file preview-file))))
-  (let ((filename (buffer-file-name)))
-    (if (file-exists-p filename)
-	(let ((ps (plantuml--preview-process filename)))
-	  (set-process-sentinel ps #'plantuml--preview-process-sentinel))
-      (user-error "File not present. Save file before previewing"))))
-
-(defun platnuml--open-paint (filename)
-  "Launch MS-Paint to preview generated png file"
-  (let ((default-directory (file-name-directory filename))
-	(target-file (file-name-nondirectory filename)))
-    (start-process "*plantuml-open-preview*" nil "mspaint" target-file)))
-
-(defun plantuml-open-preview ()
-  "Open generated preview png file in MS-Paint"
-  (interactive)
-  (let ((filename expand-file-name
-		  (concat (file-name-base (buffer-file-name)) ".png")
-		  (file-name-directory (buffer-file-name)))))
-  (if (file-exists-p filename)
-      (platnuml--open-paint filename)))
 
 ;; bootstrap template functions
 (defun plantuml--select-diagram-prompt ()
@@ -736,22 +850,23 @@ argument (C-u) to remove any existing preview png file."
 (require 'cl-lib)
 (require 'xref)
 
-(defun plantum-xref-backend ()
+(defun plantuml-xref-backend ()
   "xref backend for plantuml files"
   'plantuml)
-(cl-defmethod ref-backend-identifier-at-point ((backend (eql plantuml)))
+
+(cl-defmethod ref-backend-identifier-at-point ((_ (eql plantuml)))
   "Return the identifier to lookup"
-;; (message "plantuml-xref (%s): Identifier %s (point=%d)" (buffer-name) (symbol-at-point) ( point ))
+  ;; (message "plantuml-xref (%s): Identifier %s (point=%d)" (buffer-name) (symbol-at-point) ( point ))
   (symbol-name (symbol-at-point))
   )
 ;; xref-backend
-(cl-defmethod ref-backend-identifier-completion-table ((backend (eql plantuml)))
+(cl-defmethod ref-backend-identifier-completion-table ((_ (eql plantuml)))
   "Return list of terms for completion from the current buffer"
   (plantuml--find-definitions nil))
-(cl-defmethod ref-backend-definitions ((backend (eql plantuml)) symbol)
+(cl-defmethod ref-backend-definitions ((_ (eql plantuml)) symbol)
   ;; (message "plantuml-xref (%s) : %s" (buffer-name) symbol)
   (plantuml--find-definitions symbol t))
-(cl-defmethod ref-backend-references ((backend (eql plantuml)) symbol)
+(cl-defmethod ref-backend-references ((_ (eql plantuml)) symbol)
   "List of references matching symbol"
   (plantuml--find-definitions symbol t))
 ;; xref helper funtion
@@ -778,10 +893,6 @@ argument (C-u) to remove any existing preview png file."
     )
   )
 
-;;; debugging
-(defun eval-file ()
-  (interactive)
-  (eval-buffer (current-buffer))
-  (user-error "Evaluated plantuml-mode"))
+(provide 'plantuml-mode)
 
-(local-set-key (kbd "C-c C-c") #'eval-file)
+;;; plantuml-mode.el -- Ends here
