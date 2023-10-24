@@ -3,19 +3,19 @@
   "xref backend for plantuml files"
   'plantuml)
 
-(cl-defmethod ref-backend-identifier-at-point ((_ (eql plantuml)))
+(cl-defmethod xref-backend-identifier-at-point ((_ (eql plantuml)))
   "Return the identifier to lookup"
   ;; (message "plantuml-xref (%s): Identifier %s (point=%d)" (buffer-name) (symbol-at-point) ( point ))
   (symbol-name (symbol-at-point))
   )
 ;; xref-backend
-(cl-defmethod ref-backend-identifier-completion-table ((_ (eql plantuml)))
+(cl-defmethod xref-backend-identifier-completion-table ((_ (eql plantuml)))
   "Return list of terms for completion from the current buffer"
   (plantuml--find-definitions nil))
-(cl-defmethod ref-backend-definitions ((_ (eql plantuml)) symbol)
+(cl-defmethod xref-backend-definitions ((_ (eql plantuml)) symbol)
   ;; (message "plantuml-xref (%s) : %s" (buffer-name) symbol)
   (plantuml--find-definitions symbol t))
-(cl-defmethod ref-backend-references ((_ (eql plantuml)) symbol)
+(cl-defmethod xref-backend-references ((_ (eql plantuml)) symbol)
   "List of references matching symbol"
   (plantuml--find-definitions symbol t))
 ;; xref helper funtion
