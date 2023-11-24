@@ -17,8 +17,25 @@
   (plantuml--find-definitions symbol t))
 (cl-defmethod xref-backend-references ((_ (eql plantuml)) symbol)
   "List of references matching symbol"
-  (plantuml--find-definitions symbol t))
+  (plantuml--find-references symbol))
+
 ;; xref helper funtion
+(defun plantuml--find-references (symbol)
+  "Find references of symbol in the buffer"
+  (let ((case-fold-search t)
+	(regexp (rx-to-string `(seq bow ,symbol eow)))
+	(matches))
+    (save-excursion
+      (save-restriction
+	(widen)
+	(while (re-search-forward regexp nil t)
+	  (push
+	   (xref-make
+	    (buffer-substring (pos-bol) (pos-eol))
+	    (xref-make-buffer-location (current-buffer) (match-beginning 0)))
+	   matches))))
+    matches))
+
 (defun plantuml--find-definitions (symbol &optional ref)
   "Find definitions in buffer if 'REF' is + retun matches"
   (let ((case-fold-search t)
