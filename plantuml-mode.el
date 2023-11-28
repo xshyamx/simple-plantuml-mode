@@ -24,6 +24,11 @@
   :type 'string
   :group 'plantuml)
 
+(defconst plantuml-insert-basename-comment t
+  "Insert basename comment when inserting the initial diagram template"
+  :type 'boolean
+  :group 'plantuml)
+
 (defun plantuml--default-preview-program ()
   (pcase system-type
     ('windows-nt "msphotos")
@@ -153,7 +158,7 @@
 (defconst plantuml--font-lock-keywords
   (list
    ;; regexp
-   (concat "\\<" (regexp-opt plantuml--keywords) "|\>" )
+   (concat "\\<" (regexp-opt plantuml--keywords) "\\>" )
    ;; font-face
    '(0 font-lock-keyword-face)))
 
@@ -440,9 +445,16 @@ in the $APPS_HOME/plantuml folder"
 							 plantuml-diagram-types
 							 "Select diagram" )))
 		(let* ((suffix (car (last diagram)))
-					 (start (format "@start%s\n" suffix)))
-			(goto-char 0)
-			(insert (format "%s\n@end%s\n" start suffix))
+		       (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
+		       (cursor))
+		  (goto-char (point-min))
+		  (insert (Format "@start%s\n" suffix))
+		  (when insert-bnc
+		    (insert (format "' %s\n"
+												(file-name-sans-extension
+												 (file-name-nondirectory (buffer-file-name))))))
+		  (setq cursor (point))
+		  (insert (format "@end%s\n" suffix))
 			(goto-char (1+ (length start))))))
 
 (defun plantuml--make-alias (s)
