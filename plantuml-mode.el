@@ -24,7 +24,7 @@
   :type 'string
   :group 'plantuml)
 
-(defconst plantuml-insert-basename-comment t
+(defcustom plantuml-insert-basename-comment t
   "Insert basename comment when inserting the initial diagram template"
   :type 'boolean
   :group 'plantuml)
