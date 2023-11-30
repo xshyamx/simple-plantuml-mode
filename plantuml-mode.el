@@ -59,13 +59,13 @@
 
 ;;; default mode map
 (defvar plantuml-mode-map
-		(let ((keymap (make-sparse-keymap)))
-			(define-key keymap (kbd "C-c C-c") #'plantuml-compile)
-			(define-key keymap (kbd "C-c C-p") #'plantuml-preview)
-			(define-key keymap (kbd "C-c C-o") #'plantuml-open-preview)
-			(define-key keymap (kbd "C-c !") #'plantuml-select-diagram)
-			(define-key keymap (kbd "C-c i") #'plantuml-insert-element)
-			keymap))
+  (let ((keymap (make-sparse-keymap)))
+    (define-key keymap (kbd "C-c C-c") #'plantuml-compile)
+    (define-key keymap (kbd "C-c C-p") #'plantuml-preview)
+    (define-key keymap (kbd "C-c C-o") #'plantuml-open-preview)
+    (define-key keymap (kbd "C-c !") #'plantuml-select-diagram)
+    (define-key keymap (kbd "C-c i") #'plantuml-insert-element)
+    keymap))
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
 ;;; syntax table
@@ -82,13 +82,13 @@
 
 (defconst plantuml--deployment-elements
   '(component database rectangle artifact frame actor interface file
-  folder package agent boundary card circle cloud collections control
-  entity hexagon label node queue stack storage usecase)
+	      folder package agent boundary card circle cloud collections control
+	      entity hexagon label node queue stack storage usecase)
   "Elements in a deployment diagram")
 
 (defconst plantuml--sequence-elements
   '(participant actor database collections boundary control entity
-  queue)
+		queue)
   "Elements in a sequence diagram")
 
 ;; diagram types
@@ -103,13 +103,13 @@
   "Types of PlantUML diagrams")
 
 (defconst plantuml-component-elements
-	'(("c" "component")("d" "database")("a" "actor")("t" "artifact")("f" "file")
-		("d" "folder")("m" "frame")("i" "interface")("p" "package")("r" "rectangle")
-		("l" "collections")("q" "queue") ("b" "label")("n" "node")("v" "actor/")
-		("g" "agent")("y" "boundary")("g" "card")("o" "circle")("x" "cloud")
-		("z" "control")("e" "entity")("h" "hexagon")("k" "stack")("s" "storage")
-		("u" "usecase")("w" "usecase/"))
-	"Elements for PlantUML component diagram")
+  '(("c" "component")("d" "database")("a" "actor")("t" "artifact")("f" "file")
+    ("d" "folder")("m" "frame")("i" "interface")("p" "package")("r" "rectangle")
+    ("l" "collections")("q" "queue") ("b" "label")("n" "node")("v" "actor/")
+    ("g" "agent")("y" "boundary")("g" "card")("o" "circle")("x" "cloud")
+    ("z" "control")("e" "entity")("h" "hexagon")("k" "stack")("s" "storage")
+    ("u" "usecase")("w" "usecase/"))
+  "Elements for PlantUML component diagram")
 
 ;;; font-lock-keywords
 (defconst plantuml--font-lock-components
@@ -317,9 +317,9 @@
 ;;; compilation helpers
 (defun plantuml--kill-inactive (buffer)
   (unless (equal (window-buffer) buffer)
-	  (when-let ((bw (seq-find (lambda (w) (equal buffer (window-buffer w))) (window-list))))
-	    (delete-window bw))
-	  (kill-buffer buffer)))
+    (when-let ((bw (seq-find (lambda (w) (equal buffer (window-buffer w))) (window-list))))
+      (delete-window bw))
+    (kill-buffer buffer)))
 
 (defun plantuml--compile-close (buffer status)
   (when (string-prefix-p "*plantuml-" (buffer-name buffer))
@@ -421,8 +421,8 @@ JAVA HOME environment variable is set"
    (let ((java-home (getenv "JAVA_HOME" )))
      (if (string-prefix-p "%" java-home)
 	 (getenv (replace-regexp-in-string "%" "" java-home))
-     java-home
-     ))))
+       java-home
+       ))))
 
 (defun get-plantuml-jar ()
   "Returns absolute path to plantuml jar file assuming APPS_HOME
@@ -440,159 +440,159 @@ in the $APPS_HOME/plantuml folder"
 (defun plantuml-select-diagram ()
   "Insert bootstrap template based on the diagram type selected"
   (interactive)
-	(when-let ((diagram
-							(plantuml--select-from-table
-							 plantuml-diagram-types
-							 "Select diagram" )))
-		(let* ((suffix (car (last diagram)))
-		       (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
-		       (cursor))
-		  (goto-char (point-min))
-		  (insert (Format "@start%s\n" suffix))
-		  (when insert-bnc
-		    (insert (format "' %s\n"
-												(file-name-sans-extension
-												 (file-name-nondirectory (buffer-file-name))))))
-		  (setq cursor (point))
-		  (insert (format "@end%s\n" suffix))
-			(goto-char (1+ (length start))))))
+  (when-let ((diagram
+	      (plantuml--select-from-table
+	       plantuml-diagram-types
+	       "Select diagram" )))
+    (let* ((suffix (car (last diagram)))
+	   (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
+	   (cursor))
+      (goto-char (point-min))
+      (insert (format "@start%s\n" suffix))
+      (when insert-bnc
+	(insert (format "' %s\n"
+			(file-name-sans-extension
+			 (file-name-nondirectory (buffer-file-name))))))
+      (setq cursor (point))
+      (insert (format "\n@end%s\n" suffix))
+      (goto-char cursor))))
 
 (defun plantuml--make-alias (s)
-		"Construct an alias from the string"
-		(mapconcat
-		 (lambda (x)
-			 (char-to-string
-				(car (append
-							(replace-regexp-in-string
-							 (rx (not (any word digit)))
-							 "" x)
-							nil))))
-		 (split-string (downcase s))
-		 ""))
+  "Construct an alias from the string"
+  (mapconcat
+   (lambda (x)
+     (char-to-string
+      (car (append
+	    (replace-regexp-in-string
+	     (rx (not (any word digit)))
+	     "" x)
+	    nil))))
+   (split-string (downcase s))
+   ""))
 
 (defmacro plantuml--pair-formatter (pf)
-	"Return function to format the pair"
-	`(lambda (item)
-		 (format ,pf (propertize (car item) 'font-lock-face 'font-lock-constant-face)
-						 (propertize (cadr item) 'font-lock-face 'font-lock-function-name-face))))
+  "Return function to format the pair"
+  `(lambda (item)
+     (format ,pf (propertize (car item) 'font-lock-face 'font-lock-constant-face)
+	     (propertize (cadr item) 'font-lock-face 'font-lock-function-name-face))))
 
 (defun plantuml--1-column (table)
-	"Format TABLE in a single column"
-	(mapconcat
-	 (plantuml--pair-formatter "[%s]...%s")
-	 table
-	 "\n" ))
+  "Format TABLE in a single column"
+  (mapconcat
+   (plantuml--pair-formatter "[%s]...%s")
+   table
+   "\n" ))
 
 (defun plantuml--2-column (table)
-	(let ((col1) (col2) (i 0) (el)
-				(col1f (plantuml--pair-formatter " [%s]...%-14s"))
-				(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
-				(e2) (rtn))
-			(dolist (i (number-sequence 0 (1- (length table))))
-				(if (= (mod i 2) 0)
-						(push (nth i table) col1)
-					(push (nth i table) col2)))
-			(setq col1 (reverse col1)
-						col2 (reverse col2))
-			(setq el (pop col1)
-						e2 (pop col2))
-			(while (or el e2)
-				(push (concat
-							 (if el
-									 (funcall col1f el)
-								 (make-string 20 ? ))
-							 (if e2
-									 (funcall col2f el)
-								 ""))
-							rtn)
-				(setq el (pop col1)
-							e2 (pop col2))
-				)
-			(string-join (reverse rtn) "\n")))
+  (let ((col1) (col2) (i 0) (el)
+	(col1f (plantuml--pair-formatter " [%s]...%-14s"))
+	(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
+	(e2) (rtn))
+    (dolist (i (number-sequence 0 (1- (length table))))
+      (if (= (mod i 2) 0)
+	  (push (nth i table) col1)
+	(push (nth i table) col2)))
+    (setq col1 (reverse col1)
+	  col2 (reverse col2))
+    (setq el (pop col1)
+	  e2 (pop col2))
+    (while (or el e2)
+      (push (concat
+	     (if el
+		 (funcall col1f el)
+	       (make-string 20 ? ))
+	     (if e2
+		 (funcall col2f el)
+	       ""))
+	    rtn)
+      (setq el (pop col1)
+	    e2 (pop col2))
+      )
+    (string-join (reverse rtn) "\n")))
 
 (defun plantuml--3-column (table)
-	(let ((col1) (col2) (col3)
-				(col1f (plantuml--pair-formatter "[%s]...%-14s"))
-				(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
-				(i 0) (e1) (e2) (e3) (rtn))
-			(dolist (i (number-sequence 0 (1- (length table))))
-				(pcase (mod i 3)
-					(0 (push (nth i table) col1)) (1 (push (nth i table) col2))
-					(2 (push (nth i table) col3))
-					))
-			(setq col1 (reverse col1)
-						col2 (reverse col2)
-						col3 (reverse col3))
-			(setq e1 (pop col1)
-						e2 (pop col2)
-						е3 (pop col3))
-			(while (or e1 e2 e3)
-				(push (concat
-							 (if e1
-									 (funcall col1f e1)
-								 (make-string 20 ? ))
-							 (if e2
-									 (funcall col2f e2)
-								 (make-string 25 ? ))
-							 (if e3
-									 (funcall col2f e3)
-								 ""))
-							rtn)
-				(setq e1 (pop col1)
-							e2 (pop col2)
-							е3 (pop col3))
-				)
-			(string-join (reverse rtn) "\n")))
+  (let ((col1) (col2) (col3)
+	(col1f (plantuml--pair-formatter "[%s]...%-14s"))
+	(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
+	(i 0) (e1) (e2) (e3) (rtn))
+    (dolist (i (number-sequence 0 (1- (length table))))
+      (pcase (mod i 3)
+	(0 (push (nth i table) col1)) (1 (push (nth i table) col2))
+	(2 (push (nth i table) col3))
+	))
+    (setq col1 (reverse col1)
+	  col2 (reverse col2)
+	  col3 (reverse col3))
+    (setq e1 (pop col1)
+	  e2 (pop col2)
+	  е3 (pop col3))
+    (while (or e1 e2 e3)
+      (push (concat
+	     (if e1
+		 (funcall col1f e1)
+	       (make-string 20 ? ))
+	     (if e2
+		 (funcall col2f e2)
+	       (make-string 25 ? ))
+	     (if e3
+		 (funcall col2f e3)
+	       ""))
+	    rtn)
+      (setq e1 (pop col1)
+	    e2 (pop col2)
+	    е3 (pop col3))
+      )
+    (string-join (reverse rtn) "\n")))
 
 (defun plantuml--select-from-table (table prompt &optional format)
-	(let (allowed-keys rtn pressed formatter buffer (inhibit-quit t))
-		(save-window-excursion
-			(setq buffer (org-switch-to-buffer-other-window "*plantuml-select*"))
-			(catch 'exit
-				(while t
-					(erase-buffer)
-					(font-lock-mode 1)
-					(insert prompt "\n\n")
-					(setq allowed-keys (mapcar #'car table))
-					(let ((tl (length table)))
-						(setq formatter (or
-														 formatter
-														 (cond
-															((< tl 10) #'plantuml--1-column)
-															((and (> tl 10) (< tl 20)) #'plantuml--2-column)
-															(t #'plantuml--3-column)))))
-					(insert (funcall formatter table))
-					(push "\C-g" allowed-keys)
-					(goto-char (point-min))
-					(message prompt)
-					(setq pressed (char-to-string (read-char-exclusive)))
-					(while (not (member pressed allowed-keys))
-						(message "Invalid key `%s' pressed")
-						(sit-for 1)
-						(message prompt)
-						(setq pressed (char-to-string (read-char-exclusive))))
-					(when (equal pressed "\C-g")
-						(kill-buffer buffer)
-						(error "Abort" ))
-					(throw 'exit
-								 (setq rtn (seq-find (lambda (x) (string= pressed (car x))) table))))))
-		(when buffer (kill-buffer buffer))
-		rtn))
+  (let (allowed-keys rtn pressed formatter buffer (inhibit-quit t))
+    (save-window-excursion
+      (setq buffer (org-switch-to-buffer-other-window "*plantuml-select*"))
+      (catch 'exit
+	(while t
+	  (erase-buffer)
+	  (font-lock-mode 1)
+	  (insert prompt "\n\n")
+	  (setq allowed-keys (mapcar #'car table))
+	  (let ((tl (length table)))
+	    (setq formatter (or
+			     formatter
+			     (cond
+			      ((< tl 10) #'plantuml--1-column)
+			      ((and (> tl 10) (< tl 20)) #'plantuml--2-column)
+			      (t #'plantuml--3-column)))))
+	  (insert (funcall formatter table))
+	  (push "\C-g" allowed-keys)
+	  (goto-char (point-min))
+	  (message prompt)
+	  (setq pressed (char-to-string (read-char-exclusive)))
+	  (while (not (member pressed allowed-keys))
+	    (message "Invalid key `%s' pressed")
+	    (sit-for 1)
+	    (message prompt)
+	    (setq pressed (char-to-string (read-char-exclusive))))
+	  (when (equal pressed "\C-g")
+	    (kill-buffer buffer)
+	    (error "Abort" ))
+	  (throw 'exit
+		 (setq rtn (seq-find (lambda (x) (string= pressed (car x))) table))))))
+    (when buffer (kill-buffer buffer))
+    rtn))
 
 (defun plantuml-insert-element ()
-	"Insert deployment diagram element"
-	(interactive)
-	(when-let ((element
-							(plantuml--select-from-table
-							 plantuml-component-elements
-							 "Select element" )))
-		(let ((desc (read-string "Element name: ")))
-			(insert
-			 (format
-				"%s %s as \"%s\""
-				(cadr element)
-				(plantuml--make-alias desc)
-				desc)))))
+  "Insert deployment diagram element"
+  (interactive)
+  (when-let ((element
+	      (plantuml--select-from-table
+	       plantuml-component-elements
+	       "Select element" )))
+    (let ((desc (read-string "Element name: ")))
+      (insert
+       (format
+	"%s %s as \"%s\""
+	(cadr element)
+	(plantuml--make-alias desc)
+	desc)))))
 
 
 (provide 'plantuml-mode)
