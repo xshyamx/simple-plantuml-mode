@@ -31,7 +31,7 @@
 	(while (re-search-forward regexp nil t)
 	  (push
 	   (xref-make
-	    (buffer-substring (pos-bol) (pos-eol))
+	    (buffer-substring (line-beginning-position) (line-end-position))
 	    (xref-make-buffer-location (current-buffer) (match-beginning 0)))
 	   matches))))
     matches))
