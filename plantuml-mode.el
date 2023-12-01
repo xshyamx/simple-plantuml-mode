@@ -1,6 +1,14 @@
 ;;; plantuml-mode.el -- Major mode for plantuml diagrams -*- lexical-binding: t -*-
 
-;; Define ref backend
+;; Author: xshyamx
+;; Maintainer: xshyamx
+;; Homepage: https://github.com/xshyamx/simple-plantuml-mode
+;; Created: 28 Oct 2023
+;; Version: 0.0.4
+;; Package-Requires: ((emacs "25.1"))
+;; Keywords: languages, convenience
+
+;; Define xref backend
 (require 'cl-lib)
 (require 'compile)
 (require 'seq)
