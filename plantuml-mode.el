@@ -318,7 +318,6 @@
 
 ;;;###autoload
 (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
-  (require 'compile)
   (add-to-list 'compilation-error-regexp-alist (car form))
   (add-to-list 'compilation-error-regexp-alist-alist form)
   (add-to-list 'compilation-finish-functions #'plantuml--compile-close))
