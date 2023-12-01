@@ -318,6 +318,7 @@
 
 ;;;###autoload
 (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
+  (require 'compile)
   (add-to-list 'compilation-error-regexp-alist (car form))
   (add-to-list 'compilation-error-regexp-alist-alist form)
   (add-to-list 'compilation-finish-functions #'plantuml--compile-close))
@@ -556,7 +557,7 @@ in the $APPS_HOME/plantuml folder"
 (defun plantuml--select-from-table (table prompt &optional format)
   (let (allowed-keys rtn pressed formatter buffer (inhibit-quit t))
     (save-window-excursion
-      (setq buffer (org-switch-to-buffer-other-window "*plantuml-select*"))
+      (setq buffer (switch-to-buffer-other-window "*plantuml-select*"))
       (catch 'exit
 	(while t
 	  (erase-buffer)
