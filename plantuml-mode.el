@@ -324,11 +324,12 @@
 (defun plantuml--compile-close (buffer status)
   (when (string-prefix-p "*plantuml-" (buffer-name buffer))
     (run-with-timer plantuml-close-compilation-buffer nil #'plantuml--kill-inactive buffer))
-  (let ((file (buffer-local-value 'source-buffer-file buffer))
-	(bufname (buffer-name buffer)))
-    (when (and (string= "finished\n" status)
-	       (string-prefix-p "*plantuml-open" bufname))
-      (plantuml--open-preview-program (concat (file-name-sans-extension file) ".png")))))
+  (when (buffer-local-boundp 'source-buffer-file buffer)
+    (let ((file (buffer-local-value 'source-buffer-file buffer))
+	  (bufname (buffer-name buffer)))
+      (when (and (string= "finished\n" status)
+		 (string-prefix-p "*plantuml-open" bufname))
+	(plantuml--open-preview-program (concat (file-name-sans-extension file) ".png"))))))
 
 (defun plantuml--compilation-command (action)
   (pcase action
