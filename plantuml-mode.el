@@ -333,12 +333,11 @@
 		 (string-prefix-p "*plantuml-open" bufname))
 	(plantuml--open-preview-program (concat (file-name-sans-extension file) ".png"))))))
 
-;;;###autoload
-(eval-after-load 'compile
-  (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
-    (add-to-list 'compilation-error-regexp-alist (car form))
-    (add-to-list 'compilation-error-regexp-alist-alist form)
-    (add-to-list 'compilation-finish-functions #'plantuml--compile-close)))
+;; setup compilation error processing
+(let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
+  (add-to-list 'compilation-error-regexp-alist (car form))
+  (add-to-list 'compilation-error-regexp-alist-alist form)
+  (add-to-list 'compilation-finish-functions #'plantuml--compile-close))
 
 (defun plantuml--compilation-command (action)
   (pcase action
