@@ -317,10 +317,11 @@
 (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
 
 ;;;###autoload
-(let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
-  (add-to-list 'compilation-error-regexp-alist (car form))
-  (add-to-list 'compilation-error-regexp-alist-alist form)
-  (add-to-list 'compilation-finish-functions #'plantuml--compile-close))
+(eval-after-load 'compile
+  (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
+    (add-to-list 'compilation-error-regexp-alist (car form))
+    (add-to-list 'compilation-error-regexp-alist-alist form)
+    (add-to-list 'compilation-finish-functions #'plantuml--compile-close)))
 
 ;;; compilation helpers
 (defun plantuml--kill-inactive (buffer)
@@ -493,7 +494,7 @@ in the $APPS_HOME/plantuml folder"
    "\n" ))
 
 (defun plantuml--2-column (table)
-  (let ((col1) (col2) (i 0) (el)
+  (let ((col1) (col2) (el)
 	(col1f (plantuml--pair-formatter " [%s]...%-14s"))
 	(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
 	(e2) (rtn))
@@ -523,7 +524,7 @@ in the $APPS_HOME/plantuml folder"
   (let ((col1) (col2) (col3)
 	(col1f (plantuml--pair-formatter "[%s]...%-14s"))
 	(col2f (plantuml--pair-formatter (concat (make-string 5 ? ) " [%s]...%-14s")))
-	(i 0) (e1) (e2) (e3) (rtn))
+	(e1) (e2) (e3) (rtn))
     (dolist (i (number-sequence 0 (1- (length table))))
       (pcase (mod i 3)
 	(0 (push (nth i table) col1)) (1 (push (nth i table) col2))
@@ -534,7 +535,7 @@ in the $APPS_HOME/plantuml folder"
 	  col3 (reverse col3))
     (setq e1 (pop col1)
 	  e2 (pop col2)
-	  е3 (pop col3))
+	  e3 (pop col3))
     (while (or e1 e2 e3)
       (push (concat
 	     (if e1
@@ -565,7 +566,7 @@ in the $APPS_HOME/plantuml folder"
 	  (setq allowed-keys (mapcar #'car table))
 	  (let ((tl (length table)))
 	    (setq formatter (or
-			     formatter
+			     format
 			     (cond
 			      ((< tl 10) #'plantuml--1-column)
 			      ((and (> tl 10) (< tl 20)) #'plantuml--2-column)
@@ -576,7 +577,7 @@ in the $APPS_HOME/plantuml folder"
 	  (message prompt)
 	  (setq pressed (char-to-string (read-char-exclusive)))
 	  (while (not (member pressed allowed-keys))
-	    (message "Invalid key `%s' pressed")
+	    (message "Invalid key `%s'" pressed)
 	    (sit-for 1)
 	    (message prompt)
 	    (setq pressed (char-to-string (read-char-exclusive))))
