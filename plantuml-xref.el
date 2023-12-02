@@ -1,4 +1,7 @@
 ;;; plantuml-xref.el -- plantuml xref backend -*- lexical-binding: t -*-
+(require 'xref)
+(require 'cl-lib)
+
 (defun plantuml-xref-backend ()
   "xref backend for plantuml files"
   'plantuml)
