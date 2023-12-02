@@ -316,13 +316,6 @@
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
 
-;;;###autoload
-(eval-after-load 'compile
-  (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
-    (add-to-list 'compilation-error-regexp-alist (car form))
-    (add-to-list 'compilation-error-regexp-alist-alist form)
-    (add-to-list 'compilation-finish-functions #'plantuml--compile-close)))
-
 ;;; compilation helpers
 (defun plantuml--kill-inactive (buffer)
   (unless (equal (window-buffer) buffer)
@@ -339,6 +332,13 @@
       (when (and (string= "finished\n" status)
 		 (string-prefix-p "*plantuml-open" bufname))
 	(plantuml--open-preview-program (concat (file-name-sans-extension file) ".png"))))))
+
+;;;###autoload
+(eval-after-load 'compile
+  (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
+    (add-to-list 'compilation-error-regexp-alist (car form))
+    (add-to-list 'compilation-error-regexp-alist-alist form)
+    (add-to-list 'compilation-finish-functions #'plantuml--compile-close)))
 
 (defun plantuml--compilation-command (action)
   (pcase action
@@ -550,7 +550,7 @@ in the $APPS_HOME/plantuml folder"
 	    rtn)
       (setq e1 (pop col1)
 	    e2 (pop col2)
-	    е3 (pop col3))
+	    e3 (pop col3))
       )
     (string-join (reverse rtn) "\n")))
 
