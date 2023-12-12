@@ -411,7 +411,7 @@ argument (C-u) to clear existing preview output files"
   (plantuml--run-compile "open-preview"))
 
 (defun plantuml--preview-candidate-files (base)
-  (mapcar (lambda (ext) (concat base "." ext)) plantuml--output-file-extensions))
+  (mapcar (lambda (ext) (concat base "." (symbol-name ext))) plantuml--output-file-extensions))
 
 (defun plantuml--delete-if-exists (file)
   (when (file-exists-p file)
