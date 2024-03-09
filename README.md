@@ -41,7 +41,8 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 1. Clone the repository into site-lisp in the emacs user directory
 
 	``` sh
-	git clone https://github.com/xshyamx/simple-plantuml-mode $HOME/.emacs.d/site-lisp/simple-plantuml-mode
+	git clone https://github.com/xshyamx/simple-plantuml-mode \
+	    $HOME/.emacs.d/site-lisp/simple-plantuml-mode
 	```
 
 2. Add to `load-path`
