@@ -588,20 +588,23 @@ in the $APPS_HOME/plantuml folder"
     (when buffer (kill-buffer buffer))
     rtn))
 
-(defun plantuml-insert-element ()
+(defun plantuml-insert-element (prefix)
   "Insert deployment diagram element"
-  (interactive)
+  (interactive "p")
   (when-let ((element
 	      (plantuml--select-from-table
 	       plantuml-component-elements
 	       "Select element" )))
-    (let ((desc (read-string "Element name: ")))
-      (insert
-       (format
-	"%s %s as \"%s\""
-	(cadr element)
-	(plantuml--make-alias desc)
-	desc)))))
+    (if (eql 16 prefix)
+	(let ((als (read-string "Alias: "))
+	      (ci (make-string (current-indentation) ? )))
+	  (insert (format "%s %s [\n%s]" (cadr element) als ci)))
+      (let* ((desc (read-string "Element name: "))
+	     (als (if (eql 4 prefix)
+		      (read-string "Alias: ")
+		    (plantuml--make-alias desc))))
+	(insert
+	 (format "%s %s as \"%s\"" (cadr element) als desc))))))
 
 
 (provide 'plantuml-mode)
