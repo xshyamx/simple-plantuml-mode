@@ -13,9 +13,9 @@
   )
 
 (defconst plantuml--diagram-types
-  '("board" "bpm" "creole" "cute" "def" "ditaa" "dot" "flow" "gantt"
-    "git" "jockit" "json" "latex" "math" "mindmap" "nwdiag" "project"
-    "salt" "tree" "uml" "wbs" "wire" "yaml")
+  '("board" "bpm" "chronology" "creole" "cute" "def" "ditaa" "dot"
+  "flow" "gantt" "git" "jockit" "json" "latex" "math" "mindmap"
+  "nwdiag" "project" "salt" "regex" "tree" "uml" "wbs" "wire" "yaml")
   "Plantuml diagram types")
 
 (defconst plantuml--keywords

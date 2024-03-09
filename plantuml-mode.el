@@ -106,6 +106,8 @@
     ("s" "Salt UI wireframe" "salt")
     ("g" "Gantt chart" "gantt")
     ("w" "Work breakdown structure" "wbs")
+    ("r" "Regex diagram" "regex")
+    ("c" "Chronology diagram" "chronology")
     ("j" "JSON" "json")
     ("y" "YAML" "yaml"))
   "Types of PlantUML diagrams")
