@@ -448,6 +448,37 @@ in the $APPS_HOME/plantuml folder"
       (when plantuml-jar
 	(expand-file-name plantuml-jar plantuml-home)))))
 
+(defun plantuml--blank-diagram (diagram)
+  "Insert diagram skeleton when buffer is empty"
+  (let* ((suffix (car (last diagram)))
+	 (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
+	 (cursor))
+    (goto-char (point-min))
+    (insert (format "@start%s\n" suffix))
+    (when insert-bnc
+      (insert (format "' %s\n"
+		      (file-name-sans-extension
+		       (file-name-nondirectory (buffer-file-name))))))
+    (setq cursor (point))
+    (insert (format "\n@end%s\n" suffix))
+    (goto-char cursor)))
+
+(defun plantuml--change-diagram (diagram)
+  "Change existing diagram identifiers"
+  (let ((suffix (car (last diagram))))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+	      (rx-to-string
+	       `(seq
+		 bol (* space) "@" (group (or "start" "end"))
+		 (group
+		  (or ,@(mapcar #'caddr plantuml-diagram-types))))
+	       t)
+	      nil t)
+	(replace-match
+	 (concat "@" (match-string-no-properties 1) suffix))))))
+
 (defun plantuml-select-diagram ()
   "Insert bootstrap template based on the diagram type selected"
   (interactive)
@@ -455,18 +486,9 @@ in the $APPS_HOME/plantuml folder"
 	      (plantuml--select-from-table
 	       plantuml-diagram-types
 	       "Select diagram" )))
-    (let* ((suffix (car (last diagram)))
-	   (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
-	   (cursor))
-      (goto-char (point-min))
-      (insert (format "@start%s\n" suffix))
-      (when insert-bnc
-	(insert (format "' %s\n"
-			(file-name-sans-extension
-			 (file-name-nondirectory (buffer-file-name))))))
-      (setq cursor (point))
-      (insert (format "\n@end%s\n" suffix))
-      (goto-char cursor))))
+    (if (= 0 (buffer-size))
+	(plantuml--blank-diagram diagram)
+      (plantuml--change-diagram diagram))))
 
 (defun plantuml--make-alias (s)
   "Construct an alias from the string"
