@@ -17,6 +17,9 @@ Adds the following keybindings
 | <kbd>C-c !</kbd>     | Select diagram type when starting a diagram                        |
 | <kbd>C-c i</kbd>     | Insert a deployment diagram element with automatic alias generated |
 | <kbd>C-u C-c i</kbd> | Insert diagram element with prompt for alias                       |
+| <kbd>M-<up></kbd>    | Move line up                                                       |
+| <kbd>M-<down></kbd>  | Move line down                                                     |
+
 
 ## Why? ##
 

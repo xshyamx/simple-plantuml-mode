@@ -73,6 +73,8 @@
     (define-key keymap (kbd "C-c C-o") #'plantuml-open-preview)
     (define-key keymap (kbd "C-c !") #'plantuml-select-diagram)
     (define-key keymap (kbd "C-c i") #'plantuml-insert-element)
+    (define-key keymap (kbd "M-<up>") #'plantuml-move-line-up)
+    (define-key keymap (kbd "M-<down>") #'plantuml-move-line-down)
     keymap))
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
@@ -630,6 +632,21 @@ in the $APPS_HOME/plantuml folder"
 	(insert
 	 (format "%s %s as \"%s\"" (cadr element) als desc))))))
 
+
+(defun plantuml-move-line-up ()
+  (interactive)
+  (let ((col (- (point) (line-beginning-position))))
+    (transpose-lines 1)
+    (forward-line -2)
+    (goto-char (+ col (line-beginning-position)))))
+
+(defun plantuml-move-line-down ()
+  (interactive)
+  (let ((col (- (point) (line-beginning-position))))
+    (forward-line 1)
+    (transpose-lines 1)
+    (forward-line -1)
+    (goto-char (+ col (line-beginning-position)))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
