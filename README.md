@@ -9,16 +9,16 @@ Supports
 
 Adds the following keybindings
 
-| Keybinding           | Feature                                                            |
-|----------------------|--------------------------------------------------------------------|
-| <kbd>C-c C-c</kbd>   | Compile diagram to check for errors                                |
-| <kbd>C-c C-p</kbd>   | Generate diagram preview                                           |
-| <kbd>C-c C-o</kbd>   | Generate diagram preview & open in external image viewer           |
-| <kbd>C-c !</kbd>     | Select diagram type when starting a diagram                        |
-| <kbd>C-c i</kbd>     | Insert a deployment diagram element with automatic alias generated |
-| <kbd>C-u C-c i</kbd> | Insert diagram element with prompt for alias                       |
-| <kbd>M-<up></kbd>    | Move line up                                                       |
-| <kbd>M-<down></kbd>  | Move line down                                                     |
+| Keybinding                | Feature                                                            |
+|---------------------------|--------------------------------------------------------------------|
+| <kbd>C-c C-c</kbd>        | Compile diagram to check for errors                                |
+| <kbd>C-c C-p</kbd>        | Generate diagram preview                                           |
+| <kbd>C-c C-o</kbd>        | Generate diagram preview & open in external image viewer           |
+| <kbd>C-c !</kbd>          | Select diagram type when starting a diagram                        |
+| <kbd>C-c i</kbd>          | Insert a deployment diagram element with automatic alias generated |
+| <kbd>C-u C-c i</kbd>      | Insert diagram element with prompt for alias                       |
+| <kbd>M-&lt;up&gt;</kbd>   | Move line up                                                       |
+| <kbd>M-&lt;down&gt;</kbd> | Move line down                                                     |
 
 
 ## Why? ##
