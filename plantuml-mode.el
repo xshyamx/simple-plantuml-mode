@@ -502,7 +502,7 @@ in the $APPS_HOME/plantuml folder"
 	     (rx (not (any word digit)))
 	     "" x)
 	    nil))))
-   (split-string (downcase s))
+   (split-string (downcase (string-replace "\\n" "" s)))
    ""))
 
 (defmacro plantuml--pair-formatter (pf)
