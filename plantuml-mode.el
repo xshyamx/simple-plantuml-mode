@@ -378,7 +378,7 @@ open"
 	      (find-file-other-window file))
 	(when existing-buffer
 	  (revert-buffer nil t t)
-	  (switch-to-buffer-other-window existing-buffer))))))))
+	  (switch-to-buffer-other-window existing-buffer))))))
 
 (defun plantuml--open-preview-program (filename)
   "Launch preview program to preview generated png file"
