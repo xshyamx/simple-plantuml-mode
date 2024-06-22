@@ -42,12 +42,13 @@
     ('windows-nt "msphotos")
     ('darwin "/usr/bin/open")
     ('ms-dos "mspaint")
-    (_ "/usr/bin/eog")))
+    ('gnu/linux "/usr/bin/eog")
+    (_ "emacs")))
 
 (defcustom plantuml-preview-program (plantuml--default-preview-program)
   "Program to use for opening preview files"
   :type 'string
-  :options '(mspaint msphotos)
+  :options '(mspaint msphotos emacs)
   :group 'plantuml)
 
 (defcustom plantuml-force-save-before-preview t
@@ -367,14 +368,30 @@
 (defmacro plantuml--compilation-buffer-name (action)
   `(lambda (_) (format "*plantuml-%s*" ,action)))
 
+(defun plantuml--preview-in-emacs (file)
+  "Open FILE in an emacs buffer revert the buffer if it is already
+open"
+  (when (file-exists-p file)
+    (let ((existing-buffer (find-buffer-visiting file)))
+      (with-current-buffer
+	  (or existing-buffer
+	      (find-file-other-window file))
+	(when existing-buffer
+	  (revert-buffer nil t t)
+	  (switch-to-buffer-other-window existing-buffer))))))))
+
 (defun plantuml--open-preview-program (filename)
   "Launch preview program to preview generated png file"
   (let ((default-directory (file-name-directory filename))
 	(target-file (file-name-nondirectory filename))
 	(buffer-name "*plantuml-open-preview*"))
-    (if (string-equal plantuml-preview-program "msphotos")
-	(start-process buffer-name nil "cmd.exe" "/c" "start" "" target-file)
-      (start-process buffer-name nil plantuml-preview-program target-file))))
+    (cond
+     ((string-equal plantuml-preview-program "msphotos")
+      (start-process buffer-name nil "cmd.exe" "/c" "start" "" target-file))
+     ((and (display-images-p)
+	   (string-equal plantuml-preview-program "emacs"))
+      (plantuml--preview-in-emacs target-file))
+     (t (start-process buffer-name nil plantuml-preview-program target-file)))))
 
 (defun plantuml--run-compile (action)
   "Run specified compilation action to display compilation buffer"
