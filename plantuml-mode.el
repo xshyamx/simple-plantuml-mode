@@ -69,13 +69,14 @@
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "C-c C-c") #'plantuml-compile)
-    (define-key keymap (kbd "C-c C-p") #'plantuml-preview)
-    (define-key keymap (kbd "C-c C-o") #'plantuml-open-preview)
-    (define-key keymap (kbd "C-c !") #'plantuml-select-diagram)
-    (define-key keymap (kbd "C-c i") #'plantuml-insert-element)
-    (define-key keymap (kbd "M-<up>") #'plantuml-move-line-up)
-    (define-key keymap (kbd "M-<down>") #'plantuml-move-line-down)
+    (keymap-set keymap "C-c C-c"  #'plantuml-compile)
+    (keymap-set keymap "C-c C-p"  #'plantuml-preview)
+    (keymap-set keymap "C-c C-o"  #'plantuml-open-preview)
+    (keymap-set keymap "C-c !"	  #'plantuml-select-diagram)
+    (keymap-set keymap "C-c i"	  #'plantuml-insert-element)
+    (keymap-set keymap "M-<up>"	  #'plantuml-move-line-up)
+    (keymap-set keymap "M-<down>" #'plantuml-move-line-down)
+    (keymap-set keymap "C-c c"	  #'plantuml-insert-container)
     keymap))
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
@@ -519,7 +520,9 @@ in the $APPS_HOME/plantuml folder"
 	     (rx (not (any word digit)))
 	     "" x)
 	    nil))))
-   (split-string (downcase (string-replace "\\n" "" s)))
+   (split-string
+    (downcase
+     (replace-regexp-in-string "\\\\n\\|[\n_]+" " " s)))
    ""))
 
 (defmacro plantuml--pair-formatter (pf)
@@ -664,6 +667,17 @@ in the $APPS_HOME/plantuml folder"
     (transpose-lines 1)
     (forward-line -1)
     (goto-char (+ col (line-beginning-position)))))
+
+(defun plantuml-insert-container (prefix name)
+  (interactive "p\nsContainer Name: ")
+  (let ((prefix (make-string (current-indentation) ? )) (p))
+    (insert "rectangle \"" name "\" "
+	    "#transparent;line."
+	    (if (eql 4 prefix) "dotted" "dashed")
+	    " {\n" prefix "  ")
+    (setq p (point))
+    (insert "\n}")
+    (goto-char p)))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
