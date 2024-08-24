@@ -36,5 +36,15 @@
 	  (goto-char 0)
 	  (should (re-search-forward expected nil t)))))))
 
+(ert-deftest plantuml--expand-special ()
+  "Tests for expanding special"
+  (let ((scenarios '(("a->" . nil)
+		     ("a->b,c" . ("a --> b" "a --> c"))
+		     ("a,b->c->d,e" . ("a --> c" "b --> c" "c --> d" "c --> e")))))
+    (dolist (scenario scenarios)
+      (cl-destructuring-bind (input . expected) scenario
+	(should (equal (plantuml--make-pairs input "-")
+		       expected))))))
+
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here

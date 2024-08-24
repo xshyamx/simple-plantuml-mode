@@ -69,15 +69,18 @@
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (keymap-set keymap "C-c C-c"  #'plantuml-compile)
-    (keymap-set keymap "C-c C-p"  #'plantuml-preview)
-    (keymap-set keymap "C-c C-o"  #'plantuml-open-preview)
-    (keymap-set keymap "C-c !"	  #'plantuml-select-diagram)
-    (keymap-set keymap "C-c i"	  #'plantuml-insert-element)
-    (keymap-set keymap "M-<up>"	  #'plantuml-move-line-up)
-    (keymap-set keymap "M-<down>" #'plantuml-move-line-down)
-    (keymap-set keymap "C-c c"	  #'plantuml-insert-container)
+    (keymap-set keymap "C-c C-c"    #'plantuml-compile)
+    (keymap-set keymap "C-c C-p"    #'plantuml-preview)
+    (keymap-set keymap "C-c C-o"    #'plantuml-open-preview)
+    (keymap-set keymap "C-c !"	    #'plantuml-select-diagram)
+    (keymap-set keymap "C-c i"	    #'plantuml-insert-element)
+    (keymap-set keymap "M-<up>"	    #'plantuml-move-line-up)
+    (keymap-set keymap "M-<down>"   #'plantuml-move-line-down)
+    (keymap-set keymap "C-c c"	    #'plantuml-insert-container)
+    (keymap-set keymap "C-j"	    #'plantuml-expand-special)
+    (keymap-set keymap "C-<return>" #'plantuml-expand-special)
     keymap))
+
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
 ;;; syntax table
@@ -87,6 +90,11 @@
 
 (modify-syntax-entry ?\' "<" plantuml-mode-syntax-table)
 (modify-syntax-entry ?\n ">" plantuml-mode-syntax-table)
+
+(defvar plantuml-imenu-generic-expression
+      (list
+       (list nil (rx-to-string `(: bol (* space) (or ,@plantuml--component-types) eow (+ space) (group (* any))) t) 1))
+      "Imenu regular expression")
 
 ;;; constants
 (defconst plantuml--output-file-extensions '(png cmapx)
@@ -316,8 +324,8 @@
     (setq plantuml-jar-path (get-plantuml-jar)))
 
   (font-lock-add-keywords 'plantuml-mode plantuml--font-lock-mindmap-headers)
-  (add-hook 'xref-backend-functions #'plantuml-xref-backend)
-  )
+  (add-hook 'xref-backend-functions #'plantuml-xref-backend t)
+  (setq-local imenu-generic-expression plantuml-imenu-generic-expression))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
@@ -680,6 +688,62 @@ in the $APPS_HOME/plantuml folder"
     (setq p (point))
     (insert "\n" indent "}")
     (goto-char p)))
+
+(defun plantuml--make-pairs (s line-type)
+  "Expand string `S' to make pairs"
+  (let* ((parts (split-string s "->"))
+	 (ds (mapcar
+	      (lambda (s)
+		(seq-filter
+		 (lambda (s) (> (length s) 0))
+		 (mapcar #'string-trim (split-string s ","))))
+	      parts))
+	 (l (1- (length ds)))
+	 (rs))
+    (dolist (i (number-sequence 0 l))
+      (dolist (s (nth i ds))
+	(dolist (d (nth (1+ i) ds))
+	  (when (and s d)
+	    (push (format "%s %s%s> %s" s line-type line-type d) rs)))))
+
+    (reverse rs)))
+
+(defun plantuml--insert-pairs (pairs indent)
+  (when pairs
+    (move-end-of-line nil)
+    (delete-region (line-beginning-position) (point))
+    (insert (mapconcat (lambda (p) (format "%s%s" indent p)) pairs "\n"))
+    t))
+
+(defun plantuml-expand-special (prefix)
+  (interactive "p")
+  (let ((line (buffer-substring-no-properties
+	       (line-beginning-position)
+	       (line-end-position)))
+	(indent (make-string (current-indentation) ? ))
+	(line-type (cond ((>= prefix 16) "~")
+			 ((>= prefix 4) ".")
+			 (t "-")))
+	(inserted))
+    (setq inserted
+	  (and line (plantuml--insert-pairs
+		     (plantuml--make-pairs line line-type) indent)))
+    (unless inserted
+      (string-edit
+       "Enter expression
+Example:
+
+a->b,c
+
+expands to:
+
+a --> b
+a --> c"
+       (string-trim line)
+       (lambda (edited)
+	 (plantuml--insert-pairs
+	  (plantuml--make-pairs edited line-type) indent))
+       :abort-callback #'identity))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
