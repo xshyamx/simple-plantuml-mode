@@ -33,6 +33,19 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 - Wanted quick creation of plantuml diagram components
 - Wanted jump-to-definition & list-references within the file
 
+## Nice to have features ##
+
+- Imenu listings for component definitions
+- Simple emmet-mode like completions for relationships eg. `a->b,c->d`
+  expands to
+
+  ```
+  a --> b
+  b --> c
+  b --> d
+  c --> d
+  ```
+
 ## Installation ##
 
 ### Pre-requisites ###
