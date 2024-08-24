@@ -513,16 +513,15 @@ in the $APPS_HOME/plantuml folder"
 (defun plantuml--make-alias (s)
   "Construct an alias from the string"
   (mapconcat
-   (lambda (x)
-     (char-to-string
-      (car (append
-	    (replace-regexp-in-string
-	     (rx (not (any word digit)))
-	     "" x)
-	    nil))))
-   (split-string
-    (downcase
-     (replace-regexp-in-string "\\\\n\\|[\n_]+" " " s)))
+   (lambda (x) (char-to-string (car (append x nil))))
+   (seq-filter
+    (lambda (s) (> (length s) 0))
+    (mapcar
+     (lambda (x) (replace-regexp-in-string
+		  (rx (not (any word digit))) "" x))
+     (split-string
+      (downcase
+       (replace-regexp-in-string "\\\\n\\|[\n_-]+" " " s)))))
    ""))
 
 (defmacro plantuml--pair-formatter (pf)

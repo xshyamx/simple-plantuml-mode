@@ -14,7 +14,10 @@
 		     ("Frontend \n Application" . "fa")
 		     ("Frontend \\n Application" . "fa")
 		     ("Database 1" . "d1")
-		     ("one 1 2 3" . "o123"))))
+		     ("one 1 2 3" . "o123")
+		     ("Jack & Jill" . "jj")
+		     ("find-replace" . "fr")
+		     ("One \n Two & Three " . "ott"))))
     (dolist (scenario scenarios)
       (should
        (string= (cdr scenario)
