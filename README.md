@@ -19,7 +19,7 @@ Adds the following keybindings
 | <kbd>C-u C-c i</kbd>      | Insert diagram element with prompt for alias                                       |
 | <kbd>M-&lt;up&gt;</kbd>   | Move line up                                                                       |
 | <kbd>M-&lt;down&gt;</kbd> | Move line down                                                                     |
-| <kbd>C-c c</kbd>          | Insert transparent rectangle container with dashed (Use <kbd>C-u</kbd> for dotted) |
+| <kbd>C-c c</kbd>          | Insert transparent rectangle container with dashed (Use <kbd>C-u</kbd> for dotted, <kbd>C-u C-u</kbd> for box) |
 
 ## Why? ##
 

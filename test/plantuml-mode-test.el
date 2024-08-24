@@ -23,5 +23,18 @@
        (string= (cdr scenario)
 		(plantuml--make-alias (car scenario)))))))
 
+(ert-deftest plantuml--make-container-test ()
+  "Tests for making containers"
+  (let ((scenarios
+	 '((1  "Plain" "rectangle \"Plain\" #transparent;line.dashed {")
+	   (4  "Plain" "rectangle \"Plain\" #transparent;line.dotted {")
+	   (16 "Plain" "rectangle \"Plain\" #transparent {"))))
+    (dolist (scenario scenarios)
+      (cl-destructuring-bind (prefix name expected) scenario
+	(with-temp-buffer
+	  (plantuml-insert-container prefix name)
+	  (goto-char 0)
+	  (should (re-search-forward expected nil t)))))))
+
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here

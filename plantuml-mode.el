@@ -669,13 +669,16 @@ in the $APPS_HOME/plantuml folder"
 
 (defun plantuml-insert-container (prefix name)
   (interactive "p\nsContainer Name: ")
-  (let ((prefix (make-string (current-indentation) ? )) (p))
+  (let ((indent (make-string (current-indentation) ? )) (p))
     (insert "rectangle \"" name "\" "
-	    "#transparent;line."
-	    (if (eql 4 prefix) "dotted" "dashed")
-	    " {\n" prefix "  ")
+	    "#transparent"
+	    (pcase prefix
+	      (1 ";line.dashed")
+	      (4 ";line.dotted")
+	      (_ ""))
+	    " {\n" indent "  ")
     (setq p (point))
-    (insert "\n}")
+    (insert "\n" indent "}")
     (goto-char p)))
 
 (provide 'plantuml-mode)
