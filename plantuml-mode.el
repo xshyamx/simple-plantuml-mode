@@ -93,7 +93,7 @@
 
 (defvar plantuml-imenu-generic-expression
       (list
-       (list nil (rx-to-string `(: bol (* space) (or ,@plantuml--component-types) eow (+ space) (group (* any))) t) 1))
+       (list nil (rx-to-string `(: bol (* space) (or ,@plantuml--component-types) eow (+ space) (group (* any))) t) 0))
       "Imenu regular expression")
 
 ;;; constants
