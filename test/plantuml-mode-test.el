@@ -39,8 +39,18 @@
 (ert-deftest plantuml--expand-special ()
   "Tests for expanding special"
   (let ((scenarios '(("a->" . nil)
-		     ("a->b,c" . ("a --> b" "a --> c"))
-		     ("a,b->c->d,e" . ("a --> c" "b --> c" "c --> d" "c --> e")))))
+		     ("a->b,c" . ("a --> b"
+				  "a --> c"))
+		     ("a,b->c->d,e" . ("a --> c"
+				       "b --> c"
+				       "c --> d"
+				       "c --> e"))
+		     ("a,b->c<-d,e->f" . ("a --> c"
+					  "b --> c"
+					  "c <-- d"
+					  "c <-- e"
+					  "d --> f"
+					  "e --> f")))))
     (dolist (scenario scenarios)
       (cl-destructuring-bind (input . expected) scenario
 	(should (equal (plantuml--make-pairs input "-")

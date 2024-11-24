@@ -689,24 +689,46 @@ in the $APPS_HOME/plantuml folder"
     (insert "\n" indent "}")
     (goto-char p)))
 
+
+(defun plantuml--parse-expr (s)
+  "Parse the expression and return a list of binary operands with
+the arrow direction ltr/rtl"
+  (with-temp-buffer
+    (insert s)
+    (goto-char 0)
+    (let ((last-offset 1) (tokens))
+      (while (re-search-forward (rx (or "->" "<-")) nil t)
+	(push (buffer-substring-no-properties
+	       last-offset (match-beginning 0))
+	      tokens)
+	(push (if (string= "->" (match-string-no-properties 0))
+		  'ltr
+		'rtl)
+	      tokens)
+	(setq last-offset (match-end 0)))
+      (when (< last-offset (point-max))
+	(push (buffer-substring-no-properties
+	       last-offset (point-max))
+	      tokens))
+      (let ((list (mapcar
+		   (lambda (s) (if (symbolp s) s (split-string s "," t split-string-default-separators)))
+		   (reverse tokens)))
+	    (rs))
+	(seq-do-indexed
+	 (lambda (e i)
+	   (when (symbolp e)
+	     (push (list (nth (1- i) list) e (nth (1+ i) list)) rs)))
+	 list)
+	(reverse rs)))))
+
 (defun plantuml--make-pairs (s line-type)
   "Expand string `S' to make pairs"
-  (let* ((parts (split-string s "->"))
-	 (ds (mapcar
-	      (lambda (s)
-		(seq-filter
-		 (lambda (s) (> (length s) 0))
-		 (mapcar #'string-trim (split-string s ","))))
-	      parts))
-	 (l (1- (length ds)))
-	 (rs))
-    (dolist (i (number-sequence 0 l))
-      (dolist (s (nth i ds))
-	(dolist (d (nth (1+ i) ds))
-	  (when (and s d)
-	    (push (format "%s %s%s> %s" s line-type line-type d) rs)))))
-
-    (reverse rs)))
+  (let ((ls) (arrow (concat line-type line-type)))
+    (dolist (rs (plantuml--parse-expr s))
+      (dolist (l (nth 0 rs))
+	(dolist (r (nth 2 rs))
+	  (push (format "%s %s %s" l (if (eql 'ltr (nth 1 rs)) (concat arrow ">")  (concat "<" arrow)) r) ls))))
+    (reverse ls)))
 
 (defun plantuml--insert-pairs (pairs indent)
   "Insert the PAIRS by replacing the current expression. Sets the
