@@ -709,9 +709,13 @@ in the $APPS_HOME/plantuml folder"
     (reverse rs)))
 
 (defun plantuml--insert-pairs (pairs indent)
+  "Insert the PAIRS by replacing the current expression. Sets the
+mark before expanding so, user can quickly select the inserted
+text for further transformation with `C-x-x'"
   (when pairs
     (move-end-of-line nil)
     (delete-region (line-beginning-position) (point))
+    (push-mark)
     (insert (mapconcat (lambda (p) (format "%s%s" indent p)) pairs "\n"))
     t))
 
