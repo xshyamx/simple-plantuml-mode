@@ -657,7 +657,7 @@ in the $APPS_HOME/plantuml folder"
 		      (read-string "Alias: ")
 		    (plantuml--make-alias desc))))
 	(insert
-	 (format "%s %s as \"%s\"" (cadr element) als desc))))))
+	 (format "%s \"%s\" as %s" (cadr element) desc als))))))
 
 
 (defun plantuml-move-line-up ()
