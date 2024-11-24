@@ -37,14 +37,14 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 ## Nice to have features ##
 
 - Imenu listings for component definitions
-- Simple emmet-mode like completions for relationships eg. `a->b,c->d`
+- Simple emmet-mode like completions for relationships eg. `a->b,c<-d`
   expands to
 
   ```
   a --> b
-  b --> c
-  b --> d
-  c --> d
+  a --> c
+  b <-- d
+  c <-- d
   ```
 
 ## Installation ##
