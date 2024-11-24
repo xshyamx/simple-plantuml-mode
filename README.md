@@ -47,6 +47,24 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
   b <-- d
   c <-- d
   ```
+
+  Running `C-u C-j` on the same expression results in
+
+  ```
+  a ..> b
+  a ..> c
+  b <.. d
+  c <.. d
+  ```
+  Running `C-u C-u C-j` on the same expression results in
+
+  ```
+  a ~~> b
+  a ~~> c
+  b <~~ d
+  c <~~ d
+  ```
+
 - Convert region of text to component type declarations eg. selecting the following lines
 
   ```
