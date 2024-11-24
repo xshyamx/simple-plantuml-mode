@@ -56,5 +56,18 @@
 	(should (equal (plantuml--make-pairs input "-")
 		       expected))))))
 
+(ert-deftest plantuml--convert-region ()
+  "Tests for converting regions to declarations"
+  (let ((scenarios '((("" "component")  . nil)
+		     (("User" "component") . ("component u as \"User\""))
+		     (("User" "participant" t) . ("participant \"User\" as u"))
+		     (("User\nRole\nUser Role" "entity" t) . ("entity \"User\" as u"
+							      "entity \"Role\" as r"
+							      "entity \"User Role\" as ur")))))
+    (dolist (scenario scenarios)
+      (cl-destructuring-bind (input . expected) scenario
+	(should (equal (apply #'plantuml--make-declarations input)
+		       expected))))))
+
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here

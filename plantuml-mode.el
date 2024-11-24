@@ -69,16 +69,17 @@
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (keymap-set keymap "C-c C-c"    #'plantuml-compile)
-    (keymap-set keymap "C-c C-p"    #'plantuml-preview)
-    (keymap-set keymap "C-c C-o"    #'plantuml-open-preview)
-    (keymap-set keymap "C-c !"	    #'plantuml-select-diagram)
-    (keymap-set keymap "C-c i"	    #'plantuml-insert-element)
-    (keymap-set keymap "M-<up>"	    #'plantuml-move-line-up)
-    (keymap-set keymap "M-<down>"   #'plantuml-move-line-down)
-    (keymap-set keymap "C-c c"	    #'plantuml-insert-container)
-    (keymap-set keymap "C-j"	    #'plantuml-expand-special)
-    (keymap-set keymap "C-<return>" #'plantuml-expand-special)
+    (keymap-set keymap "C-c C-c"	#'plantuml-compile)
+    (keymap-set keymap "C-c C-p"	#'plantuml-preview)
+    (keymap-set keymap "C-c C-o"	#'plantuml-open-preview)
+    (keymap-set keymap "C-c !"		#'plantuml-select-diagram)
+    (keymap-set keymap "C-c i"		#'plantuml-insert-element)
+    (keymap-set keymap "M-<up>"		#'plantuml-move-line-up)
+    (keymap-set keymap "M-<down>"	#'plantuml-move-line-down)
+    (keymap-set keymap "C-c c"		#'plantuml-insert-container)
+    (keymap-set keymap "C-j"		#'plantuml-expand-special)
+    (keymap-set keymap "C-<return>"	#'plantuml-expand-special)
+    (keymap-set keymap "C-c r"		#'plantuml-convert-region)
     keymap))
 
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
@@ -657,7 +658,7 @@ in the $APPS_HOME/plantuml folder"
 		      (read-string "Alias: ")
 		    (plantuml--make-alias desc))))
 	(insert
-	 (format "%s \"%s\" as %s" (cadr element) desc als))))))
+	 (format "%s %s as \"%s\"" (cadr element) als desc))))))
 
 
 (defun plantuml-move-line-up ()
@@ -742,6 +743,8 @@ text for further transformation with `C-x-x'"
     t))
 
 (defun plantuml-expand-special (prefix)
+  "Expands a compound expression to simple plantuml pairs
+eg. `a,b->c' expands to `a-->c' and `a-->b'"
   (interactive "p")
   (let ((line (buffer-substring-no-properties
 	       (line-beginning-position)
@@ -770,6 +773,35 @@ a --> c"
 	 (plantuml--insert-pairs
 	  (plantuml--make-pairs edited line-type) indent))
        :abort-callback #'identity))))
+
+(defun plantuml--make-declarations (s type &optional alias-after-desc)
+  (let ((lines (split-string s "[\r\n]" t "[ \t]+"))
+	(rs))
+    (dolist (line lines)
+      (push (if alias-after-desc
+		(format "%s \"%s\" as %s"
+		       type line (plantuml--make-alias line))
+	      (format "%s %s as \"%s\""
+		       type (plantuml--make-alias line) line))
+	    rs))
+    (reverse rs)))
+
+(defun plantuml-convert-region (prefix start end)
+  "Converts the selected region to a set of plantuml component
+declarations"
+  (interactive "p\nr")
+  (when (use-region-p)
+    (let ((s (buffer-substring-no-properties start end)))
+      (delete-region start end)
+      (push-mark)
+      (insert
+       (string-join
+	(plantuml--make-declarations
+	 s
+	 (completing-read
+	  "Select component type: " plantuml--component-types)
+	 (>= prefix 4))
+	"\n")))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
