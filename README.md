@@ -4,7 +4,7 @@ Major mode for [PlantUML](https://plantuml.com/) files.
 
 Supports
 
-- Xref navigation of component definitions & references
+- Xref navigation of component definitions & references within the same file
 - Generating png preview files using the plantuml jar & java
 
 Adds the following keybindings
