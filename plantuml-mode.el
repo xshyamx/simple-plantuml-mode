@@ -74,6 +74,8 @@
     (keymap-set keymap "C-c C-o"	#'plantuml-open-preview)
     (keymap-set keymap "C-c !"		#'plantuml-select-diagram)
     (keymap-set keymap "C-c i"		#'plantuml-insert-element)
+    (keymap-set keymap "C-c C-a t"	#'plantuml-add-title)
+    (keymap-set keymap "C-c C-a f"	#'plantuml-add-footer)
     (keymap-set keymap "M-<up>"		#'plantuml-move-line-up)
     (keymap-set keymap "M-<down>"	#'plantuml-move-line-down)
     (keymap-set keymap "C-c c"		#'plantuml-insert-container)
@@ -237,7 +239,7 @@
       ;; face sexp
       `(2 (if (match-string-no-properties 1)
 	      (add-text-properties (match-beginning 2) (match-end 2)
-				   (list 'font-lock-face (list :foreground (plantuml--find-color (match-string-no-properties 1)))))
+				   (list 'font-lock-face (list :background (plantuml--find-color (match-string-no-properties 1)))))
 	    ,(format "outline-%d" x)))
       ))
    (number-sequence 1 8))
@@ -802,6 +804,33 @@ declarations"
 	  "Select component type: " plantuml--component-types)
 	 (>= prefix 4))
 	"\n")))))
+
+(defun plantuml--make-title (file)
+  "Extract the filename slug and capitalize after splitting by `-'"
+  (string-join
+   (mapcar #'capitalize
+	   (split-string
+	    (file-name-sans-extension
+	     (file-name-base file))
+	    "-"))
+   " "))
+
+(defun plantuml-add-title ()
+  "Add title based on the filename slug"
+  (interactive)
+  (save-excursion
+    (goto-char 0)
+    (forward-line 1)
+    (insert "title " (plantuml--make-title (buffer-file-name)) "\n")))
+
+(defun plantuml-add-footer ()
+  "Add footer with current date in YYYY-MM-dd format"
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (forward-line -1)
+    (insert "skinparam defaultTextAlignment right\n"
+	    "footer " (format-time-string "%Y-%m-%d") "\n")))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
