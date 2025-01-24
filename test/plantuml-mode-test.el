@@ -69,5 +69,31 @@
 	(should (equal (apply #'plantuml--make-declarations input)
 		       expected))))))
 
+(ert-deftest plantuml--include-file-open ()
+  "Test for opening included file"
+  (let* ((basedir (expand-file-name (make-temp-name "plantuml")
+																		(temporary-file-directory)))
+				 (plantuml-jar-path basedir)
+				 (include-file (expand-file-name "inc.plantuml" basedir))
+				 (test-file (expand-file-name "test.plantuml" basedir)))
+		(mkdir (expand-file-name "plantuml" basedir) t)
+		(with-temp-buffer
+			(insert "included file")
+			(write-file include-file))
+		(with-temp-buffer
+			(insert (string-join
+							 '("@startuml"
+								 "!include inc.plantuml"
+								 "@enduml")
+							 "\n"))
+			(write-file test-file))
+		(find-file test-file)
+		(with-current-buffer (get-file-buffer test-file)
+			(goto-char 0)
+			(forward-line)
+			(call-interactively #'plantuml-open-include-file))
+		(should (get-file-buffer include-file))))
+
+
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here

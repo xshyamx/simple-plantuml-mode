@@ -843,9 +843,9 @@ declarations"
 						(rx bol (* space) "!include" (+ space)
 								(group (+ any)) eol)
 						(line-end-position) t))
-			(let (((file (expand-file-name
-										(match-string-no-properties 1)
-										(file-name-directory (buffer-file-name))))))
+			(let ((file (expand-file-name
+									 (match-string-no-properties 1)
+									 (file-name-directory (buffer-file-name)))))
 				(when (file-exists-p file)
 					(find-file file))))))
 
