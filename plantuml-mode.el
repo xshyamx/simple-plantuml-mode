@@ -845,9 +845,9 @@ declarations"
 						(line-end-position) t))
 			(let (((file (expand-file-name
 										(match-string-no-properties 1)
-										(file-name-directory (buffer-file-name)))))
-						(when (file-exists-p file)
-							(find-file file)))))))
+										(file-name-directory (buffer-file-name))))))
+				(when (file-exists-p file)
+					(find-file file))))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
