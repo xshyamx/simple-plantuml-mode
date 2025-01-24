@@ -69,19 +69,20 @@
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (keymap-set keymap "C-c C-c"	#'plantuml-compile)
-    (keymap-set keymap "C-c C-p"	#'plantuml-preview)
-    (keymap-set keymap "C-c C-o"	#'plantuml-open-preview)
-    (keymap-set keymap "C-c !"		#'plantuml-select-diagram)
-    (keymap-set keymap "C-c i"		#'plantuml-insert-element)
+    (keymap-set keymap "C-c C-c"		#'plantuml-compile)
+    (keymap-set keymap "C-c C-p"		#'plantuml-preview)
+    (keymap-set keymap "C-c C-o"		#'plantuml-open-preview)
+    (keymap-set keymap "C-c !"			#'plantuml-select-diagram)
+    (keymap-set keymap "C-c i"			#'plantuml-insert-element)
     (keymap-set keymap "C-c C-a t"	#'plantuml-add-title)
     (keymap-set keymap "C-c C-a f"	#'plantuml-add-footer)
-    (keymap-set keymap "M-<up>"		#'plantuml-move-line-up)
-    (keymap-set keymap "M-<down>"	#'plantuml-move-line-down)
-    (keymap-set keymap "C-c c"		#'plantuml-insert-container)
-    (keymap-set keymap "C-j"		#'plantuml-expand-special)
+    (keymap-set keymap "M-<up>"			#'plantuml-move-line-up)
+    (keymap-set keymap "M-<down>"		#'plantuml-move-line-down)
+    (keymap-set keymap "C-c c"			#'plantuml-insert-container)
+    (keymap-set keymap "C-j"				#'plantuml-expand-special)
     (keymap-set keymap "C-<return>"	#'plantuml-expand-special)
-    (keymap-set keymap "C-c r"		#'plantuml-convert-region)
+    (keymap-set keymap "C-c r"			#'plantuml-convert-region)
+		(keymap-set keymap "C-c '"			#'plantuml-open-include-file)
     keymap))
 
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
@@ -831,6 +832,22 @@ declarations"
     (forward-line -1)
     (insert "skinparam defaultTextAlignment right\n"
 	    "footer " (format-time-string "%Y-%m-%d") "\n")))
+
+(defun plantuml-open-include-file ()
+	(interactive)
+	(save-excursion
+		(goto-char (line-beginning-position))
+		(when (and
+					 (buffer-file-name)
+					 (re-search-forward
+						(rx bol (* space) "!include" (+ space)
+								(group (+ any)) eol)
+						(line-end-position) t))
+			(let (((file (expand-file-name
+										(match-string-no-properties 1)
+										(file-name-directory (buffer-file-name)))))
+						(when (file-exists-p file)
+							(find-file file)))))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here

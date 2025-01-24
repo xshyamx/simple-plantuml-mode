@@ -22,6 +22,7 @@ Adds the following keybindings
 | <kbd>M-&lt;down&gt;</kbd> | Move line down |
 | <kbd>C-c c</kbd>          | Insert transparent rectangle container with dashed (Use <kbd>C-u</kbd> for dotted, <kbd>C-u C-u</kbd> for box) |
 | <kbd>C-j</kbd>            | Expand special like emmet mode (Alternate <kbd>C-&lt;return&gt;</kbd>). Use <kbd>C-u</kbd> for dashed & <kbd>C-u C-u</kbd> for dotted |
+| <kbd>C-c '</kbd>          | Open included file when invoked from line with `!include` directive |
 
 
 
