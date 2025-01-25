@@ -17,7 +17,8 @@
 		     ("one 1 2 3" . "o123")
 		     ("Jack & Jill" . "jj")
 		     ("find-replace" . "fr")
-		     ("One \n Two & Three " . "ott"))))
+		     ("One \n Two & Three " . "ott")
+				 ("one_two_three" . "ott"))))
     (dolist (scenario scenarios)
       (should
        (string= (cdr scenario)
@@ -69,30 +70,46 @@
 	(should (equal (apply #'plantuml--make-declarations input)
 		       expected))))))
 
+(defun plantuml--temp-dir ()
+	"Return a temporary directory for plantuml testing"
+	(expand-file-name (make-temp-name "plantuml")
+										(temporary-file-directory)))
+
+(defmacro plantuml--file-test (&rest body)
+	"Run test with a temporary directory cleaning up after test
+completes. Provides `basedir' for creating test files"
+	(declare (indent 1) (debug t))
+	`(let* ((basedir ,(plantuml--temp-dir))
+					(default-directory basedir)
+					(plantuml-jar-path basedir))
+		 (unwind-protect
+				 (progn
+					 (mkdir (expand-file-name "plantuml" basedir) t)
+					 ,@body)
+			 (delete-directory basedir t))))
+
 (ert-deftest plantuml--include-file-open ()
   "Test for opening included file"
-  (let* ((basedir (expand-file-name (make-temp-name "plantuml")
-																		(temporary-file-directory)))
-				 (plantuml-jar-path basedir)
-				 (include-file (expand-file-name "inc.plantuml" basedir))
-				 (test-file (expand-file-name "test.plantuml" basedir)))
-		(mkdir (expand-file-name "plantuml" basedir) t)
-		(with-temp-buffer
-			(insert "included file")
-			(write-file include-file))
-		(with-temp-buffer
-			(insert (string-join
-							 '("@startuml"
-								 "!include inc.plantuml"
-								 "@enduml")
-							 "\n"))
-			(write-file test-file))
-		(find-file test-file)
-		(with-current-buffer (get-file-buffer test-file)
-			(goto-char 0)
-			(forward-line)
-			(call-interactively #'plantuml-open-include-file))
-		(should (get-file-buffer include-file))))
+	(plantuml--file-test
+			(let* ((plantuml-jar-path basedir)
+						 (include-file (expand-file-name "inc.plantuml" basedir))
+						 (test-file (expand-file-name "test.plantuml" basedir)))
+				(with-temp-buffer
+					(insert "included file")
+					(write-file include-file))
+				(with-temp-buffer
+					(insert (string-join
+									 '("@startuml"
+										 "!include inc.plantuml"
+										 "@enduml")
+									 "\n"))
+					(write-file test-file))
+				(find-file test-file)
+				(with-current-buffer (get-file-buffer test-file)
+					(goto-char 0)
+					(forward-line)
+					(call-interactively #'plantuml-open-include-file))
+				(should (get-file-buffer include-file)))))
 
 
 (provide 'plantuml-mode-test)
