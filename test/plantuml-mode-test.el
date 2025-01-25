@@ -111,6 +111,48 @@ completes. Provides `basedir' for creating test files"
 					(call-interactively #'plantuml-open-include-file))
 				(should (get-file-buffer include-file)))))
 
+(ert-deftest plantuml--add-title ()
+		"Test adding title based on filename"
+	(plantuml--file-test
+			(let ((scenarios '(("one" . "@startuml\n@enduml\n")
+												 ("two" . "@startuml\ntitle One\n@enduml\n")
+												 ("one-two" . "@startuml\n@enduml\n"))))
+				(dolist (scenario scenarios)
+					(cl-destructuring-bind (slug . content) scenario
+						(let ((file (expand-file-name (concat slug ".plantuml") basedir)))
+							(with-temp-buffer
+								(insert content)
+								(write-file file))
+							(find-file file)
+							(with-current-buffer (get-file-buffer file)
+								(call-interactively #'plantuml-add-title)
+								(goto-char 0)
+								(should (re-search-forward
+												 (rx-to-string
+													`(: bol "title " ,(plantuml--make-title slug)))
+												 nil t)))))))))
+
+(ert-deftest plantuml--add-footer ()
+	"Test adding footer based on the date"
+	(plantuml--file-test
+			(let ((scenarios '(("one" . "@startuml\n@enduml\n")
+												 ("two" . "@startuml\ntitle One\n@enduml\n")
+												 ("one-two" . "@startuml\n@enduml\n"))))
+				(dolist (scenario scenarios)
+					(cl-destructuring-bind (slug . content) scenario
+						(let ((file (expand-file-name (concat slug ".plantuml") basedir))
+									(search (concat "footer " (format-time-string "%Y-%m-%d"))))
+							(with-temp-buffer
+								(insert content)
+								(write-file file))
+							(find-file file)
+							(with-current-buffer (get-file-buffer file)
+								(call-interactively #'plantuml-add-footer)
+								(goto-char 0)
+								(should (re-search-forward
+												 (rx-to-string
+													`(: bol ,search))
+												 nil t)))))))))
 
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here
