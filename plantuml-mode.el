@@ -32,6 +32,15 @@
   :type 'string
   :group 'plantuml)
 
+(defcustom plantuml-extra-args nil
+	"Extra command line arguments added to every compile & preview execution
+
+For eg. overriding the default monospace font
+
+`(setq plantuml-extra-args \\='(\"-SdefaultMonospacedFontName=\\\"Fira Code\\\"))'"
+	:type '(repeat 'string)
+	:group 'plantuml)
+
 (defcustom plantuml-insert-basename-comment t
   "Insert basename comment when inserting the initial diagram template"
   :type 'boolean
@@ -362,18 +371,22 @@
 
 (defun plantuml--compile-command (file)
   (string-join
-   (list
-    (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
-    "-jar" (shell-quote-argument plantuml-jar-path)
-    "-failfast" file)
+   (append
+		(list
+		 (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+		 "-jar" (shell-quote-argument plantuml-jar-path))
+		plantuml-extra-args
+		(list "-failfast" file))
    " "))
 
 (defun plantuml--preview-command (file)
   (string-join
-   (list
-    (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
-    "-jar" (shell-quote-argument plantuml-jar-path)
-    "-tpng" "-failfast" file)
+   (append
+		(list
+		 (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+		 "-jar" (shell-quote-argument plantuml-jar-path))
+		plantuml-extra-args
+		(list "-tpng" "-failfast" file))
    " "))
 
 (defmacro plantuml--compilation-buffer-name (action)
