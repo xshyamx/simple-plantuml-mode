@@ -148,7 +148,7 @@ For eg. overriding the default monospace font
 (defconst plantuml--font-lock-components
   (list
    ;; regexp
-   (regexp-opt plantuml--component-types)
+	 (rx-to-string `(seq bow (or ,@plantuml--component-types) eow))
    ;; font-face
    '(0 font-lock-type-face)))
 
@@ -170,7 +170,7 @@ For eg. overriding the default monospace font
 (defconst plantuml--font-lock-components
   (list
    ;; regexp
-   (regexp-opt plantuml--component-types)
+	 (rx-to-string `(seq bow (or ,@plantuml--component-types) eow))
    ;; font-face
    '(0 font-lock-type-face)))
 
@@ -191,7 +191,7 @@ For eg. overriding the default monospace font
 (defconst plantuml--font-lock-keywords
   (list
    ;; regexp
-   (concat "\\<" (regexp-opt plantuml--keywords) "\\>" )
+	 (rx-to-string `(seq bow (or ,@plantuml--keywords) eow))
    ;; font-face
    '(0 font-lock-keyword-face)))
 
