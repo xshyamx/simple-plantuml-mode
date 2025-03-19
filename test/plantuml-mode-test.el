@@ -182,5 +182,37 @@ completes. Provides `basedir' for creating test files"
 								 (should (> m 0))
 							 (should (eq nil m))))))))))
 
+(ert-deftest plantuml--update-footer-hook ()
+	"Test the update footer hook"
+	(let* ((basedir (plantuml--temp-dir))
+				 (default-directory basedir)
+				 (plantuml-jar-path basedir))
+		(unwind-protect
+				(progn
+					(mkdir basedir t)
+					(let ((file (expand-file-name "one.plantuml" basedir))
+								(buffer))
+						(with-temp-buffer
+							(insert "@startuml\n"
+											"footer 2020-12-25\n"
+											"@enduml\n")
+							(write-file file))
+						(setq buffer
+									(find-file file))
+						(with-current-buffer buffer
+							(add-hook 'before-save-hook #'plantuml-update-footer-date nil t)
+							(goto-char 0)
+							(forward-line 1)
+							(insert "skinparam defaultTextAlignment center\n")
+							(save-buffer))
+						(with-temp-buffer
+							(insert-file-contents file)
+							(goto-char 0)
+							(should (re-search-forward (format-time-string "footer %Y-%m-%d") nil t)))
+						)
+					)
+			(delete-directory basedir t)
+			)))
+
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here
