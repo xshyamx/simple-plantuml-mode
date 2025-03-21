@@ -71,28 +71,36 @@ For eg. overriding the default monospace font
   :group 'plantuml)
 
 (defcustom plantuml-close-compilation-buffer 5
-  "Number of secods after which preview compilation buffer will be killed"
+  "Number of seconds after which preview compilation buffer will be
+killed"
   :type 'integer
   :group 'plantuml)
 
+(defvar plantuml-enclose-map (make-sparse-keymap)
+	"Keymap for enclose keybindings")
+
 (defvar plantuml-add-map (make-sparse-keymap)
-	"Plantuml add fragment")
+	"Keymap for add keybindings")
+
+(require 'plantuml-extras)
 
 ;;; default mode map
 (defvar plantuml-mode-map
   (let ((keymap (make-sparse-keymap)))
-    (keymap-set keymap "C-c C-c"	#'plantuml-compile)
-    (keymap-set keymap "C-c C-p"	#'plantuml-preview)
-    (keymap-set keymap "C-c C-o"	#'plantuml-open-preview)
-    (keymap-set keymap "C-c !"		#'plantuml-select-diagram)
-    (keymap-set keymap "C-c i"		#'plantuml-insert-element)
-    (keymap-set keymap "M-<up>"		#'plantuml-move-line-up)
-    (keymap-set keymap "M-<down>"	#'plantuml-move-line-down)
-    (keymap-set keymap "C-c c"		#'plantuml-insert-container)
-    (keymap-set keymap "C-j"		#'plantuml-expand-special)
+    (keymap-set keymap "C-c C-c"		#'plantuml-compile)
+    (keymap-set keymap "C-c C-p"		#'plantuml-preview)
+    (keymap-set keymap "C-c C-o"		#'plantuml-open-preview)
+    (keymap-set keymap "C-c !"			#'plantuml-select-diagram)
+    (keymap-set keymap "C-c i"			#'plantuml-insert-element)
+    (keymap-set keymap "M-<up>"			#'plantuml-move-line-up)
+    (keymap-set keymap "M-<down>"		#'plantuml-move-line-down)
+    (keymap-set keymap "C-c c"			#'plantuml-insert-container)
+    (keymap-set keymap "C-j"				#'plantuml-expand-special)
     (keymap-set keymap "C-<return>"	#'plantuml-expand-special)
-    (keymap-set keymap "C-c r"		#'plantuml-convert-region)
-    (keymap-set keymap "C-c '"		#'plantuml-open-include-file)
+    (keymap-set keymap "C-c r"			#'plantuml-convert-region)
+    (keymap-set keymap "C-c '"			#'plantuml-open-include-file)
+		(keymap-set keymap "C-c a"			plantuml-add-map)
+		(keymap-set keymap "C-c e"			plantuml-enclose-map)
     keymap)
 	"PlantUML mode map")
 
@@ -814,90 +822,12 @@ declarations"
       (push-mark)
       (insert
        (string-join
-	(plantuml--make-declarations
-	 s
-	 (completing-read
-	  "Select component type: " plantuml--component-types)
-	 (>= prefix 4))
-	"\n")))))
-
-(defun plantuml--make-title (file)
-  "Extract the filename slug and capitalize after splitting by `-'"
-  (string-join
-   (mapcar #'capitalize
-					 (split-string
-						(file-name-sans-extension
-						 (file-name-base file))
-						"-"))
-   " "))
-
-(defmacro plantuml--add-fragment (name value)
-  `(defun ,(intern (concat "plantuml-add-" name)) (prefix)
-     ,(format "Add %s if not already present in file" name)
-     (interactive "p")
-     (save-excursion
-       (goto-char 0)
-       (condition-case nil
-					 (when (re-search-forward (rx bol (* space) ,name eow (* any) eol))
-						 (if (> prefix 1)
-								 (replace-match ,(format "%s %s" name value) t t)
-							 (message ,(format "%s already present" (capitalize name)))))
-				 ((error)
-					(goto-char 0)
-					(forward-line)
-					(while (looking-at (rx bol (* space) "'" (* any) eol))
-						(forward-line))
-					(insert ,name " " ,value "\n"))))))
-
-;; Create add map
-(keymap-set plantuml-add-map
-						"h"
-						(plantuml--add-fragment "header" "Draft"))
-(keymap-set plantuml-add-map
-						"t"
-						(plantuml--add-fragment
-						 "title"
-						 (plantuml--make-title (buffer-file-name))))
-(keymap-set plantuml-add-map
-						"f"
-						(plantuml--add-fragment
-						 "footer"
-						 (format-time-string "%Y-%m-%d")))
-;; Add keymap with prefix
-(keymap-set plantuml-mode-map "C-c a" plantuml-add-map)
-
-(defun plantuml-open-include-file ()
-  (interactive)
-  (save-excursion
-    (goto-char (line-beginning-position))
-    (when (and
-					 (buffer-file-name)
-					 (re-search-forward
-						(rx bol (* space) "!include" (+ space)
-								(group (+ any)) eol)
-						(line-end-position) t))
-      (let ((file (expand-file-name
-									 (match-string-no-properties 1)
-									 (file-name-directory (buffer-file-name)))))
-				(when (file-exists-p file)
-					(find-file file))))))
-
-(defun plantuml-update-footer-date ()
-	"Update footer date if available"
-	(save-excursion
-		(goto-char (point-min))
-		(when (and
-					 (buffer-file-name)
-					 (re-search-forward
-						(rx bol "footer" (+ space)
-								(repeat 4 digit)
-								"-" (repeat 2 digit)
-								"-" (repeat 2 digit)
-								(* any) eol)))
-			(replace-match (format-time-string "footer %Y-%m-%d") t t))))
-
-;; Add `before-save-hook'
-;; (add-hook 'before-save-hook #'plantuml-update-footer-date)
+				(plantuml--make-declarations
+				 s
+				 (completing-read
+					"Select component type: " plantuml--component-types)
+				 (>= prefix 4))
+				"\n")))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
