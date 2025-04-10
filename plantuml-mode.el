@@ -167,7 +167,7 @@ killed"
 (defconst plantuml--font-lock-diagrams
   (list
    ;; regexp
-   (rx-to-string `(seq "a" (or "start" "end") (or ,@plantuml--diagram-types)))
+   (rx-to-string `(seq "@" (or "start" "end") (or ,@plantuml--diagram-types)))
    ;; font-face
    '(0 font-lock-builtin-face)))
 
