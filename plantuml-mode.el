@@ -111,13 +111,15 @@ killed"
   (make-syntax-table)
   "Syntax table for plantuml-mode")
 
-(modify-syntax-entry ?\' "<" plantuml-mode-syntax-table)
-(modify-syntax-entry ?\n ">" plantuml-mode-syntax-table)
+(modify-syntax-entry ?'		"< 23"	plantuml-mode-syntax-table)
+(modify-syntax-entry ?\/	". 14c"	plantuml-mode-syntax-table)
+(modify-syntax-entry ?\n	">"			plantuml-mode-syntax-table)
+(modify-syntax-entry ?\r	">"			plantuml-mode-syntax-table)
 
 (defvar plantuml-imenu-generic-expression
-      (list
-       (list nil (rx-to-string `(: bol (* space) (or ,@plantuml--component-types) eow (+ space) (group (* any))) t) 0))
-      "Imenu regular expression")
+  (list
+   (list nil (rx-to-string `(: bol (* space) (or ,@plantuml--component-types) eow (+ space) (group (* any))) t) 0))
+  "Imenu regular expression")
 
 ;;; constants
 (defconst plantuml--output-file-extensions '(png cmapx)
