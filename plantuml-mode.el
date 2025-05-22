@@ -82,6 +82,9 @@ killed"
 (defvar plantuml-add-map (make-sparse-keymap)
 	"Keymap for add keybindings")
 
+(defvar plantuml-alias-max-length 4
+	"Maximum length of a PlantUML alias")
+
 (require 'plantuml-extras)
 
 ;;; default mode map
@@ -540,32 +543,62 @@ in the $APPS_HOME/plantuml folder"
   "Insert bootstrap template based on the diagram type selected"
   (interactive)
   (when-let ((diagram
-	      (plantuml--select-from-table
-	       plantuml-diagram-types
-	       "Select diagram" )))
+							(plantuml--select-from-table
+							 plantuml-diagram-types
+							 "Select diagram" )))
     (if (= 0 (buffer-size))
-	(plantuml--blank-diagram diagram)
+				(plantuml--blank-diagram diagram)
       (plantuml--change-diagram diagram))))
 
 (defun plantuml--make-alias (s)
-  "Construct an alias from the string"
-  (mapconcat
-   (lambda (x) (char-to-string (car (append x nil))))
-   (seq-filter
-    (lambda (s) (> (length s) 0))
-    (mapcar
-     (lambda (x) (replace-regexp-in-string
-		  (rx (not (any word digit))) "" x))
-     (split-string
-      (downcase
-       (replace-regexp-in-string "\\\\n\\|[\n_-]+" " " s)))))
-   ""))
+  "Construct an alias from the string S. Aliases are always lowercase
+alphanumeric
+
+To avoid single character aliases if the name/label is atmost
+`plantuml-alias-max-length' characters long without special characters
+use that as the alias Eg.
+
+APIC -> apic
+UI -> ui
+
+For longer strings split them into tokens (including `-', `_') and take
+the first character of each token to generate an alias
+
+Eg.
+Frontend Application -> fa
+
+Aliases longer than `plantuml-alias-max-length' are trimmed to it
+
+Eg.
+
+Content Management System \\n Data Center 1 \\n (Failover) -> cmsd
+"
+	(let ((max-length plantuml-alias-max-length)
+				(word-name (replace-regexp-in-string
+										(rx (not (any word digit))) "" s))
+				(candidate (mapconcat
+										(lambda (x) (char-to-string (car (append x nil))))
+										(seq-filter
+										 (lambda (s) (> (length s) 0))
+										 (mapcar
+											(lambda (x) (replace-regexp-in-string
+															(rx (not (any word digit))) "" x))
+											(split-string
+											 (replace-regexp-in-string "\\\\n\\|[\n_-]+" " " s))))
+										"")))
+		(downcase
+		 (if (<= (length word-name) max-length)
+				 word-name
+			 (if (<= (length candidate) max-length)
+					 candidate
+				 (substring candidate 0 max-length))))))
+
 
 (defmacro plantuml--pair-formatter (pf)
   "Return function to format the pair"
   `(lambda (item)
      (format ,pf (propertize (car item) 'font-lock-face 'font-lock-constant-face)
-	     (propertize (cadr item) 'font-lock-face 'font-lock-function-name-face))))
+						 (propertize (cadr item) 'font-lock-face 'font-lock-function-name-face))))
 
 (defun plantuml--1-column (table)
   "Format TABLE in a single column"

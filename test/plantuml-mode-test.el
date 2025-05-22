@@ -10,19 +10,20 @@
 
 (ert-deftest plantuml--make-alias-test ()
   "Tests for making aliases"
-  (let ((scenarios '(("ABCD" . "a")
-		     ("Frontend \n Application" . "fa")
-		     ("Frontend \\n Application" . "fa")
-		     ("Database 1" . "d1")
-		     ("one 1 2 3" . "o123")
-		     ("Jack & Jill" . "jj")
-		     ("find-replace" . "fr")
-		     ("One \n Two & Three " . "ott")
-				 ("one_two_three" . "ott"))))
+  (let ((scenarios '(("UI" . "ui")
+										 ("API" . "api")
+										 ("Frontend \n Application" . "fa")
+										 ("Frontend \\n Application" . "fa")
+										 ("Database 1" . "d1")
+										 ("one 1 2 3" . "o123")
+										 ("Jack & Jill" . "jj")
+										 ("find-replace" . "fr")
+										 ("One \n Two & Three " . "ott")
+										 ("one_two_three" . "ott"))))
     (dolist (scenario scenarios)
       (should
        (string= (cdr scenario)
-		(plantuml--make-alias (car scenario)))))))
+								(plantuml--make-alias (car scenario)))))))
 
 (ert-deftest plantuml--make-container-test ()
   "Tests for making containers"
@@ -60,15 +61,15 @@
 (ert-deftest plantuml--convert-region ()
   "Tests for converting regions to declarations"
   (let ((scenarios '((("" "component")  . nil)
-		     (("User" "component") . ("component u as \"User\""))
-		     (("User" "participant" t) . ("participant \"User\" as u"))
-		     (("User\nRole\nUser Role" "entity" t) . ("entity \"User\" as u"
-							      "entity \"Role\" as r"
-							      "entity \"User Role\" as ur")))))
+										 (("User" "component") . ("component user as \"User\""))
+										 (("User" "participant" t) . ("participant \"User\" as user"))
+										 (("User\nRole\nUser Role" "entity" t) . ("entity \"User\" as user"
+																															"entity \"Role\" as role"
+																															"entity \"User Role\" as ur")))))
     (dolist (scenario scenarios)
       (cl-destructuring-bind (input . expected) scenario
-	(should (equal (apply #'plantuml--make-declarations input)
-		       expected))))))
+				(should (equal (apply #'plantuml--make-declarations input)
+											 expected))))))
 
 (defun plantuml--temp-dir ()
 	"Return a temporary directory for plantuml testing"
@@ -211,8 +212,7 @@ completes. Provides `basedir' for creating test files"
 							(should (re-search-forward (format-time-string "footer %Y-%m-%d") nil t)))
 						)
 					)
-			(delete-directory basedir t)
-			)))
+			(delete-directory basedir t))))
 
 (provide 'plantuml-mode-test)
 ;;; plantuml-mode-test.el ends here
