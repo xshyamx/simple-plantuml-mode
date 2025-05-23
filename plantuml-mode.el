@@ -853,16 +853,17 @@ declarations"
   (interactive "p\nr")
   (when (use-region-p)
     (let ((s (buffer-substring-no-properties start end)))
-      (delete-region start end)
-      (push-mark)
-      (insert
-       (string-join
-				(plantuml--make-declarations
-				 s
-				 (completing-read
-					"Select component type: " plantuml--component-types)
-				 (>= prefix 4))
-				"\n")))))
+			(when-let (component (completing-read
+														"Select component type: " plantuml--component-types))
+				(atomic-change-group
+					(delete-region start end)
+					(push-mark)
+					(insert
+					 (string-join
+						(plantuml--make-declarations
+						 s component
+						 (>= prefix 4))
+						"\n")))))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
