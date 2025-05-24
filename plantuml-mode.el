@@ -107,6 +107,8 @@ killed"
     keymap)
 	"PlantUML mode map")
 
+(require 'plantuml-archimate)
+
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
 ;;; syntax table
