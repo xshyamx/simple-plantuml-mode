@@ -22,7 +22,6 @@ Adds the following keybindings
 | <kbd>C-c a f</kbd> | Add footer based on the current date (Use <kbd>C-u</kbd> overwrite existing footer) |
 | <kbd>C-c a s</kbd> | Add comment with the file name slug (Use <kbd>C-u</kbd> overwrite existing slug comment) |
 | <kbd>C-c a a</kbd> | Add archimate sprite declaration |
-
 | <kbd>C-c e h</kbd> | Enclose selection in `<color>` creole tag |
 | <kbd>C-c e s</kbd> | Enclose selection in `<size>` creole tag |
 | <kbd>C-c e u</kbd> | Remove any creole tag of the form `<xxx>t\|ext</xxx>` when point is positioned inside the tag contents |
