@@ -42,6 +42,7 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 - Wanted errors in plantuml compilation to be easily accessible via the compilation-mode
 - Wanted quick creation of plantuml diagram components
 - Wanted jump-to-definition & list-references within the file
+- Wanted to save the generated diagrams instead of having to manually save them each time
 
 ## Nice to have features ##
 
