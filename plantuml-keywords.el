@@ -8,9 +8,8 @@
     "control" "database" "diamond" "entity" "enum" "file" "folder"
     "frame" "hexagon" "interface" "label" "node" "object" "package"
     "participant" "person" "queue" "rectangle" "stack" "state"
-    "storage" "usecase" )
-  "Plantuml component types"
-  )
+    "storage" "usecase")
+  "Plantuml component types")
 
 (defconst plantuml--diagram-types
   '("board" "bpm" "chronology" "creole" "cute" "def" "ditaa" "dot"

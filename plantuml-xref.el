@@ -10,8 +10,8 @@
 (cl-defmethod xref-backend-identifier-at-point ((_ (eql plantuml)))
   "Return the identifier to lookup"
   ;; (message "plantuml-xref (%s): Identifier %s (point=%d)" (buffer-name) (symbol-at-point) ( point ))
-  (symbol-name (symbol-at-point))
-  )
+  (symbol-name (symbol-at-point)))
+
 ;; xref-backend
 (cl-defmethod xref-backend-identifier-completion-table ((_ (eql plantuml)))
   "Return list of terms for completion from the current buffer"
@@ -58,10 +58,7 @@
 		       (xref-make-buffer-location (current-buffer) (match-beginning 1)))
 		    (match-string-no-properties 1))
 		  matches))
-	  matches)
-	))
-    )
-  )
+	  matches)))))
 
 (provide 'plantuml-xref)
 ;;; plantuml-xref.el -- Ends here

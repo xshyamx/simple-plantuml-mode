@@ -33,13 +33,13 @@
   :group 'plantuml)
 
 (defcustom plantuml-extra-args nil
-	"Extra command line arguments added to every compile & preview execution
+  "Extra command line arguments added to every compile & preview execution
 
 For eg. overriding the default monospace font
 
 `(setq plantuml-extra-args \\='(\"-SdefaultMonospacedFontName=\\\"Fira Code\\\"))'"
-	:type '(repeat 'string)
-	:group 'plantuml)
+  :type '(repeat 'string)
+  :group 'plantuml)
 
 (defcustom plantuml-insert-basename-comment t
   "Insert basename comment when inserting the initial diagram template"
@@ -77,13 +77,13 @@ killed"
   :group 'plantuml)
 
 (defvar plantuml-enclose-map (make-sparse-keymap)
-	"Keymap for enclose keybindings")
+  "Keymap for enclose keybindings")
 
 (defvar plantuml-add-map (make-sparse-keymap)
-	"Keymap for add keybindings")
+  "Keymap for add keybindings")
 
 (defvar plantuml-alias-max-length 4
-	"Maximum length of a PlantUML alias")
+  "Maximum length of a PlantUML alias")
 
 (require 'plantuml-extras)
 
@@ -102,10 +102,10 @@ killed"
     (keymap-set keymap "C-<return>"	#'plantuml-expand-special)
     (keymap-set keymap "C-c r"			#'plantuml-convert-region)
     (keymap-set keymap "C-c '"			#'plantuml-open-include-file)
-		(keymap-set keymap "C-c a"			plantuml-add-map)
-		(keymap-set keymap "C-c e"			plantuml-enclose-map)
+    (keymap-set keymap "C-c a"			plantuml-add-map)
+    (keymap-set keymap "C-c e"			plantuml-enclose-map)
     keymap)
-	"PlantUML mode map")
+  "PlantUML mode map")
 
 (require 'plantuml-archimate)
 
@@ -243,8 +243,7 @@ killed"
 	  (*? whitespace)
 	  ":"
 	  (+? whitespace)
-	  (group (* any))
-	  ))
+	  (group (* any))))
    ;; faces
    '(1 font-lock-constant-face)
    '(2 font-lock-warning-face)
@@ -339,8 +338,7 @@ killed"
    plantuml--font-lock-creole-italic
    plantuml--font-lock-creole-underline
    plantuml--font-lock-creole-monospace
-   plantuml--font-lock-creole-strikethrough
-   ))
+   plantuml--font-lock-creole-strikethrough))
 
 ;;;###autoload
 (define-derived-mode plantuml-mode
@@ -353,9 +351,12 @@ killed"
   (unless (file-exists-p plantuml-jar-path)
     (setq plantuml-jar-path (get-plantuml-jar)))
 
-  (font-lock-add-keywords 'plantuml-mode plantuml--font-lock-mindmap-headers)
+  (font-lock-add-keywords
+   'plantuml-mode
+   plantuml--font-lock-mindmap-headers)
   (add-hook 'xref-backend-functions #'plantuml-xref-backend t)
-  (setq-local imenu-generic-expression plantuml-imenu-generic-expression))
+  (setq-local imenu-generic-expression
+	      plantuml-imenu-generic-expression))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
@@ -363,19 +364,23 @@ killed"
 ;;; compilation helpers
 (defun plantuml--kill-inactive (buffer)
   (unless (equal (window-buffer) buffer)
-    (when-let ((bw (seq-find (lambda (w) (equal buffer (window-buffer w))) (window-list))))
+    (when-let ((bw (seq-find
+		    (lambda (w) (equal buffer (window-buffer w)))
+		    (window-list))))
       (delete-window bw))
     (kill-buffer buffer)))
 
 (defun plantuml--compile-close (buffer status)
   (when (string-prefix-p "*plantuml-" (buffer-name buffer))
-    (run-with-timer plantuml-close-compilation-buffer nil #'plantuml--kill-inactive buffer))
+    (run-with-timer plantuml-close-compilation-buffer
+		    nil #'plantuml--kill-inactive buffer))
   (when (buffer-local-boundp 'source-buffer-file buffer)
     (let ((file (buffer-local-value 'source-buffer-file buffer))
-					(bufname (buffer-name buffer)))
+ 	  (bufname (buffer-name buffer)))
       (when (and (string= "finished\n" status)
-								 (string-prefix-p "*plantuml-open" bufname))
-				(plantuml--open-preview-program (concat (file-name-sans-extension file) ".png"))))))
+		 (string-prefix-p "*plantuml-open" bufname))
+	(plantuml--open-preview-program
+	 (concat (file-name-sans-extension file) ".png"))))))
 
 ;; setup compilation error processing
 (let ((form '(plantuml "^Error line \\([[:digit:]]+\\) in file: \\(.*\\)$" 2 1 nil (2))))
@@ -391,21 +396,21 @@ killed"
 (defun plantuml--compile-command (file)
   (string-join
    (append
-		(list
-		 (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
-		 "-jar" (shell-quote-argument plantuml-jar-path))
-		plantuml-extra-args
-		(list "-failfast" file))
+    (list
+     (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+     "-jar" (shell-quote-argument plantuml-jar-path))
+    plantuml-extra-args
+    (list "-failfast" file))
    " "))
 
 (defun plantuml--preview-command (file)
   (string-join
    (append
-		(list
-		 (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
-		 "-jar" (shell-quote-argument plantuml-jar-path))
-		plantuml-extra-args
-		(list "-tpng" "-failfast" file))
+    (list
+     (shell-quote-argument plantuml-java-cmd) "-Djava.awt.headless=true"
+     "-jar" (shell-quote-argument plantuml-jar-path))
+    plantuml-extra-args
+    (list "-tpng" "-failfast" file))
    " "))
 
 (defmacro plantuml--compilation-buffer-name (action)
@@ -417,11 +422,11 @@ open"
   (when (file-exists-p file)
     (let ((existing-buffer (find-buffer-visiting file)))
       (with-current-buffer
-					(or existing-buffer
-							(find-file-other-window file))
-				(when existing-buffer
-					(revert-buffer nil t t)
-					(switch-to-buffer-other-window existing-buffer))))))
+	  (or existing-buffer
+	      (find-file-other-window file))
+	(when existing-buffer
+	  (revert-buffer nil t t)
+	  (switch-to-buffer-other-window existing-buffer))))))
 
 (defun plantuml--open-preview-program (filename)
   "Launch preview program to preview generated png file"
@@ -451,7 +456,8 @@ open"
 	 'compilation-mode
 	 name-fn
 	 t)
-      (setq-local source-buffer-file (expand-file-name file default-directory)))))
+      (setq-local source-buffer-file
+		  (expand-file-name file default-directory)))))
 
 (defun plantuml-compile ()
   "Compile plantuml diagram to display syntax errors"
@@ -475,14 +481,16 @@ argument (C-u) to clear existing preview output files"
   (plantuml--run-compile "open-preview"))
 
 (defun plantuml--preview-candidate-files (base)
-  (mapcar (lambda (ext) (concat base "." (symbol-name ext))) plantuml--output-file-extensions))
+  (mapcar (lambda (ext) (concat base "." (symbol-name ext)))
+	  plantuml--output-file-extensions))
 
 (defun plantuml--delete-if-exists (file)
   (when (file-exists-p file)
     (delete-file file)))
 
 (defun plantuml--clear-outputs (file)
-  (let ((candidates (plantuml--preview-candidate-files (file-name-sans-extension file))))
+  (let ((candidates (plantuml--preview-candidate-files
+		     (file-name-sans-extension file))))
     (mapc #'plantuml--delete-if-exists candidates)))
 
 ;;; preview helper functions
@@ -501,8 +509,9 @@ JAVA HOME environment variable is set"
   "Returns absolute path to plantuml jar file assuming APPS_HOME
 environment variable is defined and only one jar file is present
 in the $APPS_HOME/plantuml folder"
-  (let ((plantuml-home (expand-file-name "plantuml" (getenv "APPS_HOME" )))
-	(find-jar (lambda (x) (string-suffix-p ".jar" x) )))
+  (let ((plantuml-home (expand-file-name "plantuml"
+					 (getenv "APPS_HOME")))
+	(find-jar (lambda (x) (string-suffix-p ".jar" x))))
     (let ((plantuml-jar (car
 			 (seq-filter
 			  find-jar
@@ -513,7 +522,8 @@ in the $APPS_HOME/plantuml folder"
 (defun plantuml--blank-diagram (diagram)
   "Insert diagram skeleton when buffer is empty"
   (let* ((suffix (car (last diagram)))
-	 (insert-bnc (and plantuml-insert-basename-comment (buffer-file-name)))
+	 (insert-bnc (and plantuml-insert-basename-comment
+			  (buffer-file-name)))
 	 (cursor))
     (goto-char (point-min))
     (insert (format "@start%s\n" suffix))
@@ -532,7 +542,7 @@ in the $APPS_HOME/plantuml folder"
       (goto-char (point-min))
       (while (re-search-forward
 	      (rx-to-string
-	       `(seq
+ 	       `(seq
 		 bol (* space) "@" (group (or "start" "end"))
 		 (group
 		  (or ,@(mapcar #'caddr plantuml-diagram-types))))
@@ -545,11 +555,11 @@ in the $APPS_HOME/plantuml folder"
   "Insert bootstrap template based on the diagram type selected"
   (interactive)
   (when-let ((diagram
-							(plantuml--select-from-table
-							 plantuml-diagram-types
-							 "Select diagram" )))
+ 	      (plantuml--select-from-table
+	       plantuml-diagram-types
+	       "Select diagram" )))
     (if (= 0 (buffer-size))
-				(plantuml--blank-diagram diagram)
+	(plantuml--blank-diagram diagram)
       (plantuml--change-diagram diagram))))
 
 (defun plantuml--make-alias (s)
@@ -575,32 +585,34 @@ Eg.
 
 Content Management System \\n Data Center 1 \\n (Failover) -> cmsd
 "
-	(let ((max-length plantuml-alias-max-length)
-				(word-name (replace-regexp-in-string
-										(rx (not (any word digit))) "" s))
-				(candidate (mapconcat
-										(lambda (x) (char-to-string (car (append x nil))))
-										(seq-filter
-										 (lambda (s) (> (length s) 0))
-										 (mapcar
-											(lambda (x) (replace-regexp-in-string
-															(rx (not (any word digit))) "" x))
-											(split-string
-											 (replace-regexp-in-string "\\\\n\\|[\n_-]+" " " s))))
-										"")))
-		(downcase
-		 (if (<= (length word-name) max-length)
-				 word-name
-			 (if (<= (length candidate) max-length)
-					 candidate
-				 (substring candidate 0 max-length))))))
+  (let ((max-length plantuml-alias-max-length)
+	(word-name (replace-regexp-in-string
+		    (rx (not (any word digit))) "" s))
+	(candidate (mapconcat
+		    (lambda (x) (char-to-string (car (append x nil))))
+		    (seq-filter
+		     (lambda (s) (> (length s) 0))
+		     (mapcar
+		      (lambda (x) (replace-regexp-in-string
+			      (rx (not (any word digit))) "" x))
+		      (split-string
+		       (replace-regexp-in-string "\\\\n\\|[\n_-]+" " " s))))
+		    "")))
+    (downcase
+     (if (<= (length word-name) max-length)
+	 word-name
+       (if (<= (length candidate) max-length)
+	   candidate
+	 (substring candidate 0 max-length))))))
 
 
 (defmacro plantuml--pair-formatter (pf)
   "Return function to format the pair"
   `(lambda (item)
-     (format ,pf (propertize (car item) 'font-lock-face 'font-lock-constant-face)
-						 (propertize (cadr item) 'font-lock-face 'font-lock-function-name-face))))
+     (format ,pf (propertize (car item)
+			     'font-lock-face 'font-lock-constant-face)
+	     (propertize (cadr item)
+			 'font-lock-face 'font-lock-function-name-face))))
 
 (defun plantuml--1-column (table)
   "Format TABLE in a single column"
@@ -775,7 +787,10 @@ the arrow direction ltr/rtl"
 	       last-offset (point-max))
 	      tokens))
       (let ((list (mapcar
-		   (lambda (s) (if (symbolp s) s (split-string s "," t split-string-default-separators)))
+		   (lambda (s) (if (symbolp s) s
+			    (split-string
+			     s "," t
+			     split-string-default-separators)))
 		   (reverse tokens)))
 	    (rs))
 	(seq-do-indexed
@@ -791,7 +806,13 @@ the arrow direction ltr/rtl"
     (dolist (rs (plantuml--parse-expr s))
       (dolist (l (nth 0 rs))
 	(dolist (r (nth 2 rs))
-	  (push (format "%s %s %s" l (if (eql 'ltr (nth 1 rs)) (concat arrow ">")  (concat "<" arrow)) r) ls))))
+	  (push (format
+		 "%s %s %s" l
+		 (if (eql 'ltr (nth 1 rs))
+		     (concat arrow ">")
+		   (concat "<" arrow))
+		 r)
+		ls))))
     (reverse ls)))
 
 (defun plantuml--insert-pairs (pairs indent)
@@ -810,7 +831,7 @@ text for further transformation with `C-x-x'"
 eg. `a,b->c' expands to `a-->c' and `a-->b'"
   (interactive "p")
   (let ((line (buffer-substring-no-properties
-	       (line-beginning-position)
+ 	       (line-beginning-position)
 	       (line-end-position)))
 	(indent (make-string (current-indentation) ? ))
 	(line-type (cond ((>= prefix 16) "~")
@@ -834,7 +855,7 @@ a --> c"
        (string-trim line)
        (lambda (edited)
 	 (plantuml--insert-pairs
-	  (plantuml--make-pairs edited line-type) indent))
+ 	  (plantuml--make-pairs edited line-type) indent))
        :abort-callback #'identity))))
 
 (defun plantuml--make-declarations (s type &optional alias-after-desc)
@@ -843,7 +864,7 @@ a --> c"
     (dolist (line lines)
       (push (if alias-after-desc
 		(format "%s \"%s\" as %s"
-			type line (plantuml--make-alias line))
+		 	type line (plantuml--make-alias line))
 	      (format "%s %s as \"%s\""
 		      type (plantuml--make-alias line) line))
 	    rs))
@@ -855,17 +876,17 @@ declarations"
   (interactive "p\nr")
   (when (use-region-p)
     (let ((s (buffer-substring-no-properties start end)))
-			(when-let (component (completing-read
-														"Select component type: " plantuml--component-types))
-				(atomic-change-group
-					(delete-region start end)
-					(push-mark)
-					(insert
-					 (string-join
-						(plantuml--make-declarations
-						 s component
-						 (>= prefix 4))
-						"\n")))))))
+      (when-let (component (completing-read
+			    "Select component type: " plantuml--component-types))
+	(atomic-change-group
+	  (delete-region start end)
+	  (push-mark)
+	  (insert
+	   (string-join
+	    (plantuml--make-declarations
+	     s component
+ 	     (>= prefix 4))
+	    "\n")))))))
 
 (provide 'plantuml-mode)
 ;;; plantuml-mode.el -- Ends here
