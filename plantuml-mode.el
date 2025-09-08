@@ -354,7 +354,7 @@ killed"
   (font-lock-add-keywords
    'plantuml-mode
    plantuml--font-lock-mindmap-headers)
-  (add-hook 'xref-backend-functions #'plantuml-xref-backend t)
+  (add-hook 'xref-backend-functions #'plantuml-xref-backend)
   (setq-local imenu-generic-expression
 	      plantuml-imenu-generic-expression))
 
