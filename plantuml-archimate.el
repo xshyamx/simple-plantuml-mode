@@ -13,90 +13,90 @@
 ;;; Code:
 
 (defvar plantuml--archimate-relationships
-	'("Composition"
-		"Aggregation"
-		"Assignment"
-		"Specialization"
-		"Serving"
-		"Association"
-		"Association_dir"
-		"Flow"
-		"Realization"
-		"Triggering"
-		"Access"
-		"Access_r"
-		"Access_rw"
-		"Access_w"
-		"Influence")
-	"List of Archimate PlantUML relationships")
+  '("Composition"
+    "Aggregation"
+    "Assignment"
+    "Specialization"
+    "Serving"
+    "Association"
+    "Association_dir"
+    "Flow"
+    "Realization"
+    "Triggering"
+    "Access"
+    "Access_r"
+    "Access_rw"
+    "Access_w"
+    "Influence")
+  "List of Archimate PlantUML relationships")
 
 (defvar plantuml--archimate-elements
-	'("Boundary"
-		"Strategy_Resource"
-		"Strategy_Capability"
-		"Strategy_CourseOfAction"
-		"Strategy_ValueStream"
-		"Business_Actor"
-		"Business_Role"
-		"Business_Collaboration"
-		"Business_Interface"
-		"Business_Process"
-		"Business_Function"
-		"Business_Interaction"
-		"Business_Event"
-		"Business_Service"
-		"Business_Object"
-		"Business_Contract"
-		"Business_Representation"
-		"Business_Product"
-		"Business_Location"
-		"Application_Component"
-		"Application_Collaboration"
-		"Application_Interface"
-		"Application_Function"
-		"Application_Interaction"
-		"Application_Process"
-		"Application_Event"
-		"Application_Service"
-		"Application_DataObject"
-		"Technology_Node"
-		"Technology_Device"
-		"Technology_SystemSoftware"
-		"Technology_Collaboration"
-		"Technology_Interface"
-		"Technology_Path"
-		"Technology_CommunicationNetwork"
-		"Technology_Function"
-		"Technology_Process"
-		"Technology_Interaction"
-		"Technology_Event"
-		"Technology_Service"
-		"Technology_Artifact"
-		"Physical_Equipment"
-		"Physical_Facility"
-		"Physical_DistributionNetwork"
-		"Physical_Material"
-		"Motivation_Stakeholder"
-		"Motivation_Driver"
-		"Motivation_Assessment"
-		"Motivation_Goal"
-		"Motivation_Outcome"
-		"Motivation_Principle"
-		"Motivation_Requirement"
-		"Motivation_Constraint"
-		"Motivation_Meaning"
-		"Motivation_Value"
-		"Implementation_WorkPackage"
-		"Implementation_Deliverable"
-		"Implementation_Event"
-		"Implementation_Plateau"
-		"Implementation_Gap"
-		"Other_Location"
-		"Junction_Or"
-		"Junction_And"
-		"Grouping"
-		"Group")
-	"List of PlantUML Archimate elements")
+  '("Boundary"
+    "Strategy_Resource"
+    "Strategy_Capability"
+    "Strategy_CourseOfAction"
+    "Strategy_ValueStream"
+    "Business_Actor"
+    "Business_Role"
+    "Business_Collaboration"
+    "Business_Interface"
+    "Business_Process"
+    "Business_Function"
+    "Business_Interaction"
+    "Business_Event"
+    "Business_Service"
+    "Business_Object"
+    "Business_Contract"
+    "Business_Representation"
+    "Business_Product"
+    "Business_Location"
+    "Application_Component"
+    "Application_Collaboration"
+    "Application_Interface"
+    "Application_Function"
+    "Application_Interaction"
+    "Application_Process"
+    "Application_Event"
+    "Application_Service"
+    "Application_DataObject"
+    "Technology_Node"
+    "Technology_Device"
+    "Technology_SystemSoftware"
+    "Technology_Collaboration"
+    "Technology_Interface"
+    "Technology_Path"
+    "Technology_CommunicationNetwork"
+    "Technology_Function"
+    "Technology_Process"
+    "Technology_Interaction"
+    "Technology_Event"
+    "Technology_Service"
+    "Technology_Artifact"
+    "Physical_Equipment"
+    "Physical_Facility"
+    "Physical_DistributionNetwork"
+    "Physical_Material"
+    "Motivation_Stakeholder"
+    "Motivation_Driver"
+    "Motivation_Assessment"
+    "Motivation_Goal"
+    "Motivation_Outcome"
+    "Motivation_Principle"
+    "Motivation_Requirement"
+    "Motivation_Constraint"
+    "Motivation_Meaning"
+    "Motivation_Value"
+    "Implementation_WorkPackage"
+    "Implementation_Deliverable"
+    "Implementation_Event"
+    "Implementation_Plateau"
+    "Implementation_Gap"
+    "Other_Location"
+    "Junction_Or"
+    "Junction_And"
+    "Grouping"
+    "Group")
+  "List of PlantUML Archimate elements")
 
 (defvar plantuml--archimate-element-shortnames
   '(("collaboration" . "Coll")
@@ -262,92 +262,92 @@
 (defun plantuml--archimate-sprite (selection)
   (let ((sprite-name (cl-destructuring-bind
 			 (category element) (split-string selection "-")
-		       (concat (cdr (assoc category  plantuml--archimate-category-shortnames))
-			       (cdr (assoc element  plantuml--archimate-element-shortnames))))))
+ 		       (concat (cdr (assoc category  plantuml--archimate-category-shortnames))
+ 			       (cdr (assoc element  plantuml--archimate-element-shortnames))))))
     (format "sprite $%s jar:archimate/%s" sprite-name selection)))
 
 (defun plantuml-insert-archimate-sprite ()
   (interactive)
   (when-let ((selection (completing-read
-												 "Select archimate artifact: "
-												 plantuml--archimate-sprites)))
+ 			 "Select archimate artifact: "
+			 plantuml--archimate-sprites)))
     (insert (plantuml--archimate-sprite selection))))
 
 (defun plantuml--archimate-element (element name)
 	(format "%s(%s, %S)" element (plantuml--make-alias name) name))
 
 (defun plantuml-insert-archimate-element (element name)
-	(interactive
-	 (list (completing-read
-					"Archimate Element: " plantuml--archimate-elements nil t)
-				 (read-string "Label/Name: ")))
-	(when (and (> (length element) 0)
-						 (> (length name) 0))
-		(insert (plantuml--archimate-element element name))))
+  (interactive
+   (list (completing-read
+ 	  "Archimate Element: " plantuml--archimate-elements nil t)
+	 (read-string "Label/Name: ")))
+  (when (and (> (length element) 0)
+	     (> (length name) 0))
+    (insert (plantuml--archimate-element element name))))
 
 (defun plantuml-archimate-convert-region (prefix start end)
   "Converts the selected region to a set of archimate element"
   (interactive "p\nr")
   (when (use-region-p)
     (let ((s (buffer-substring-no-properties start end)))
-			(when-let (element (completing-read
-													"Archimate Element: "
-													plantuml--archimate-elements nil t))
-				(atomic-change-group
-					(delete-region start end)
-					(push-mark)
-					(dolist (name (split-string s "[\r\n]" t "[ \t]+"))
-						(insert (plantuml--archimate-element element name) "\n")))))))
+      (when-let (element (completing-read
+			  "Archimate Element: "
+			  plantuml--archimate-elements nil t))
+	(atomic-change-group
+	  (delete-region start end)
+ 	  (push-mark)
+	  (dolist (name (split-string s "[\r\n]" t "[ \t]+"))
+	    (insert (plantuml--archimate-element element name) "\n")))))))
 
 (defun plantuml--find-archimate-elements ()
-	(let ((els))
-		(save-excursion
-			(goto-char 0)
-			(while (re-search-forward
-							(rx-to-string `(: (group (or ,@plantuml--archimate-elements)) (* space)
-																"(" (group (+ (not ","))) "," (* space)
-																"\"" (group (+ (not "\""))) "\"" (* space)
-																")"))
-							nil t)
-				(push (list :element (match-string-no-properties 1)
-										:alias (match-string-no-properties 2)
-										:label (match-string-no-properties 3))
-							els)))
-		(reverse els)))
+  (let ((els))
+    (save-excursion
+      (goto-char 0)
+      (while (re-search-forward
+	      (rx-to-string `(: (group (or ,@plantuml--archimate-elements)) (* space)
+				"(" (group (+ (not ","))) "," (* space)
+				"\"" (group (+ (not "\""))) "\"" (* space)
+				")"))
+	      nil t)
+	(push (list :element (match-string-no-properties 1)
+ 		    :alias (match-string-no-properties 2)
+		    :label (match-string-no-properties 3))
+	      els)))
+    (reverse els)))
 
 (defun plantuml--propertize-completion-list (pl)
-	(cons
-	 (format
-		"%s / %s" (plist-get pl :label)
-		(propertize (plist-get pl :element)
-								'face 'font-lock-type-face))
-	 pl))
+  (cons
+   (format
+    "%s / %s" (plist-get pl :label)
+    (propertize (plist-get pl :element)
+		'face 'font-lock-type-face))
+   pl))
 
 (defun plantuml--completing-read (prompt els)
-	(let ((pls (mapcar #'plantuml--propertize-completion-list els)))
-		(when-let (selection (completing-read prompt pls))
-			(cdr (assoc-string selection pls)))))
+  (let ((pls (mapcar #'plantuml--propertize-completion-list els)))
+    (when-let (selection (completing-read prompt pls))
+      (cdr (assoc-string selection pls)))))
 
 (defun plantuml--filter-selection (selection pls)
-	(let ((alias (plist-get selection :alias)))
-		(seq-filter
-		 (lambda (pl) (not (string= alias (plist-get pl :alias))))
-		 pls)))
+  (let ((alias (plist-get selection :alias)))
+    (seq-filter
+     (lambda (pl) (not (string= alias (plist-get pl :alias))))
+     pls)))
 
 (defun plantuml-insert-archimate-relationship ()
-	(interactive)
-	(let ((els (plantuml--find-archimate-elements))
-				(src) (target) (relationship))
-		(setq
-		 relationship (completing-read "Relationship: " plantuml--archimate-relationships)
-		 src (plantuml--completing-read "Source: " els)
-		 target (plantuml--completing-read "Target: " (plantuml--filter-selection src els)))
-		(when (and (> (length relationship) 0)
-							 (> (length src) 0)
-							 (> (length target) 0))
-			(insert (format "Rel_%s(%s, %s)" relationship
-											(plist-get src :alias)
-											(plist-get target :alias))))))
+  (interactive)
+  (let ((els (plantuml--find-archimate-elements))
+	(src) (target) (relationship))
+    (setq
+     relationship (completing-read "Relationship: " plantuml--archimate-relationships)
+     src (plantuml--completing-read "Source: " els)
+     target (plantuml--completing-read "Target: " (plantuml--filter-selection src els)))
+    (when (and (> (length relationship) 0)
+	       (> (length src) 0)
+	       (> (length target) 0))
+      (insert (format "Rel_%s(%s, %s)" relationship
+		      (plist-get src :alias)
+		      (plist-get target :alias))))))
 
 (keymap-set plantuml-add-map "a" #'plantuml-insert-archimate-sprite)
 (keymap-set plantuml-mode-map "C-c I" #'plantuml-insert-archimate-element)
