@@ -259,6 +259,9 @@
     "workpackage-filled")
   "List of Archimate sprites")
 
+(defconst plantuml--archimate-include "!include <archimate/Archimate>"
+  "Common include required for using Archimate components")
+
 (defun plantuml--archimate-sprite (selection)
   (let ((sprite-name (cl-destructuring-bind
 			 (category element) (split-string selection "-")
@@ -283,6 +286,14 @@
 	 (read-string "Label/Name: ")))
   (when (and (> (length element) 0)
 	     (> (length name) 0))
+    (let ((common-include nil))
+      (save-excursion
+	(setq common-include (re-search-backward plantuml--archimate-include  nil t)))
+      (save-excursion
+	(when (re-search-backward "!include" nil t)
+	  (goto-char (line-end-position))
+	  (unless common-include
+	    (insert "\n" plantuml--archimate-include)))))
     (insert (plantuml--archimate-element element name))))
 
 (defun plantuml-archimate-convert-region (prefix start end)

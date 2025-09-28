@@ -16,7 +16,6 @@
 (require 'plantuml-colors)
 (require 'plantuml-xref)
 (require 'plantuml-keywords)
-(require 'plantuml-stdlib)
 
 ;;; Customizable variables
 (defgroup plantuml-mode nil
@@ -109,6 +108,7 @@ killed"
   "PlantUML mode map")
 
 (require 'plantuml-archimate)
+(require 'plantuml-stdlib)
 
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
