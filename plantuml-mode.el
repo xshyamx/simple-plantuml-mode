@@ -16,6 +16,7 @@
 (require 'plantuml-colors)
 (require 'plantuml-xref)
 (require 'plantuml-keywords)
+(require 'plantuml-stdlib)
 
 ;;; Customizable variables
 (defgroup plantuml-mode nil
