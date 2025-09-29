@@ -19,7 +19,7 @@
     (azure . "Azure"))
   "List of supported plantuml standard libraries")
 
-(defvar plantuml-stdlib-selected nil
+(defvar-local plantuml-stdlib-selected nil
   "The current selected standard library")
 
 (cl-defgeneric plantuml-stdlib--common-include (library)
