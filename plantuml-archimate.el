@@ -293,8 +293,11 @@
 	(when (re-search-backward "!include" nil t)
 	  (goto-char (line-end-position))
 	  (unless common-include
-	    (insert "\n" plantuml--archimate-include)))))
-    (insert (plantuml--archimate-element element name))))
+	    (insert "\n" plantuml--archimate-include)
+	    (setq common-include t))))
+      (unless common-include
+	(insert plantuml--archimate-include "\n"))
+      (insert (plantuml--archimate-element element name)))))
 
 (defun plantuml-archimate-convert-region (prefix start end)
   "Converts the selected region to a set of archimate element"
