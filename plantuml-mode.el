@@ -386,7 +386,7 @@ killed"
 	      plantuml-imenu-generic-expression))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode) t)
+(add-to-list 'auto-mode-alist '("\\.p\\(?:lant\\)?uml\\'" . plantuml-mode) t)
 
 ;;; compilation helpers
 (defun plantuml--kill-inactive (buffer)
