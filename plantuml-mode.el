@@ -340,6 +340,33 @@ killed"
    plantuml--font-lock-creole-monospace
    plantuml--font-lock-creole-strikethrough))
 
+;; Menu definition
+(easy-menu-define
+  plantuml-mode-menu plantuml-mode-map "PlantUML Mode Menu"
+  '("PlantUML"
+    ["Compile Diagram" plantuml-compile (buffer-file-name)]
+    ["Generate Preview" plantuml-preview (buffer-file-name)]
+    ["Generate & Open Preview" plantuml-open-preview (buffer-file-name)]
+    ["---" 'ignore t]
+    ("Insert"
+     ["PlantUML Element" plantuml-insert-element t]
+     ["Container Rectangle" plantuml-insert-container t]
+     ["Archimate Element" plantuml-insert-archimate-element t])
+    ("Convert Region"
+     ["PlantUML Element" plantuml-convert-region (use-region-p)]
+     ["Archimate Element" plantuml-archimate-convert-region (use-region-p)])
+    ("Creole"
+     ["Monospace" plantuml--enclose-monospace (use-region-p)]
+     ["Color" plantuml-enclose-color (use-region-p)]
+     ["Size" plantuml-enclose-size (use-region-p)]
+     ["Remove markup" plantuml-unenclose-tag t])
+    ("Add Metadata"
+     ["Header" plantuml-add-header t]
+     ["Footer" plantuml-add-footer t]
+     ["Title" plantuml-add-title t]
+     ["Filename (slug) comment" plantuml-add-slug-comment t])
+    ["Change Diagram Type" plantuml-select-diagram t]))
+
 ;;;###autoload
 (define-derived-mode plantuml-mode
   prog-mode "plantuml" "Major mode for plantuml"
