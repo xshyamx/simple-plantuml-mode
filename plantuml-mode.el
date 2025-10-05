@@ -356,16 +356,16 @@ killed"
      ["PlantUML Element" plantuml-convert-region (use-region-p)]
      ["Archimate Element" plantuml-archimate-convert-region (use-region-p)])
     ("Creole"
-     ["Monospace" plantuml--enclose-monospace (use-region-p)]
-     ["Color" plantuml-enclose-color (use-region-p)]
-     ["Size" plantuml-enclose-size (use-region-p)]
-     ["Remove markup" plantuml-unenclose-tag t])
+     ["Monospace" plantuml--enclose-monospace :enable (use-region-p) :help "Enclose selected text as monospace"]
+     ["Color" plantuml-enclose-color :enable (use-region-p) :help "Enclose selected text with color tag"]
+     ["Size" plantuml-enclose-size :enable (use-region-p) :help "Enclose selected text with size tag "]
+     ["Remove markup" plantuml-unenclose-tag :help "Remove size/color markup"])
     ("Add Metadata"
-     ["Header" plantuml-add-header t]
-     ["Footer" plantuml-add-footer t]
-     ["Title" plantuml-add-title t]
+     ["Header" plantuml-add-header :help "Add draft header if not already present"]
+     ["Footer" plantuml-add-footer :help "Add footer with date if not already present"]
+     ["Title" plantuml-add-title :help "Add title if not already present"]
      ["Filename (slug) comment" plantuml-add-slug-comment t])
-    ["Change Diagram Type" plantuml-select-diagram t]))
+    ["Change Diagram" plantuml-select-diagram :help "Change the diagram type"]))
 
 ;;;###autoload
 (define-derived-mode plantuml-mode
