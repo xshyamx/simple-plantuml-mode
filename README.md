@@ -15,6 +15,7 @@ Adds the following keybindings
 | <kbd>C-c C-o</kbd> | Generate diagram preview & open in external image viewer |
 | <kbd>C-c !</kbd> | Select diagram type when starting a diagram |
 | <kbd>C-c i</kbd> | Insert a deployment diagram element with automatic alias generated |
+| <kbd>C-c u</kbd> | Insert a stdlib cloud element (AWS/Azure/GCP) |
 | <kbd>C-c I</kbd> | Insert archimate element |
 | <kbd>C-c l</kbd> | Insert archimate relationship between existing archimate elements in the buffer |
 | <kbd>C-u C-c i</kbd> | Insert diagram element with prompt for alias |
