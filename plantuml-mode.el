@@ -108,6 +108,7 @@ killed"
   "PlantUML mode map")
 
 (require 'plantuml-archimate)
+(require 'plantuml-stdlib)
 
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
