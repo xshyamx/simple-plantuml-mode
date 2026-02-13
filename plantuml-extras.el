@@ -201,17 +201,18 @@ positioned inside the tag contents"
 (defun plantuml-update-footer-date ()
   "Update footer date if available"
   (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (when (and
-	   (buffer-file-name)
-	   (re-search-forward
-	    (rx bol "footer" (+ space)
-		(repeat 4 digit)
-		"-" (repeat 2 digit)
-		"-" (repeat 2 digit)
-		(* any) eol)))
-      (replace-match (format-time-string "footer %Y-%m-%d") t t))))
+  (when (eq 'plantuml-mode major-mode)
+    (save-excursion
+      (goto-char (point-min))
+      (when (and
+	     (buffer-file-name)
+	     (re-search-forward
+	      (rx bol "footer" (+ space)
+		  (repeat 4 digit)
+		  "-" (repeat 2 digit)
+		  "-" (repeat 2 digit)
+		  (* any) eol)))
+	(replace-match (format-time-string "footer %Y-%m-%d") t t)))))
 
 ;; Add `before-save-hook'
 ;; (add-hook 'before-save-hook #'plantuml-update-footer-date)
