@@ -109,6 +109,7 @@ killed"
 
 (require 'plantuml-archimate)
 (require 'plantuml-stdlib)
+(require 'plantuml-openiconic)
 
 (defvar plantuml-mode-hook nil "Standard mode hook for plantuml-mode")
 
