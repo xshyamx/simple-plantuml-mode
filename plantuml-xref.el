@@ -10,7 +10,8 @@
 (cl-defmethod xref-backend-identifier-at-point ((_ (eql plantuml)))
   "Return the identifier to lookup"
   ;; (message "plantuml-xref (%s): Identifier %s (point=%d)" (buffer-name) (symbol-at-point) ( point ))
-  (symbol-name (symbol-at-point)))
+  (when (eq major-mode 'plantuml-mode)	; guard for plantuml-mode
+    (symbol-name (symbol-at-point))))
 
 ;; xref-backend
 (cl-defmethod xref-backend-identifier-completion-table ((_ (eql plantuml)))
