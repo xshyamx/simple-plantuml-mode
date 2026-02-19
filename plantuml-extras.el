@@ -144,14 +144,20 @@ color"
 	(insert "<color:" color ">"
 		s "</color>")))))
 
-(defun plantuml--enclose-monospace (start end)
-  "Enclose the selected region as monospace using `\"\"'"
-  (interactive "r")
-  (when (use-region-p)
-    (let ((s (buffer-substring-no-properties start end)))
-      (atomic-change-group
- 	(delete-region start end)
-	(insert (format "\"\"%s\"\"" s))))))
+(defmacro plantuml--enclose (style markup)
+  "Macro to create command for adding creole styles"
+  (declare (indent defun) (doc-string 3))
+  (let ((name (intern (format "plantuml--enclose-%s" style)))
+	(doc-string (format "Enclose the selected region as %s using `%s'"
+			    style markup)))
+    `(defun ,name (start end)
+       ,doc-string
+       (interactive "r")
+       (when (use-region-p)
+	 (let ((s (buffer-substring-no-properties start end)))
+	   (atomic-change-group
+	     (delete-region start end)
+	     (insert (format ,(concat markup "%s" markup) s))))))))
 
 (defun plantuml-enclose-size (start end size)
   "Enclose the selected region with creole `size' tag with the selected
@@ -191,7 +197,11 @@ positioned inside the tag contents"
 
 ;;; Add keybindings
 (let ((keymap plantuml-enclose-map))
-  (keymap-set keymap "c" #'plantuml--enclose-monospace)
+  (keymap-set keymap "c" (plantuml--enclose "monospace" "\"\""))
+  (keymap-set keymap "b" (plantuml--enclose "bold" "**"))
+  (keymap-set keymap "i" (plantuml--enclose "italics" "//"))
+  (keymap-set keymap "-" (plantuml--enclose "strike" "--"))
+  (keymap-set keymap "_" (plantuml--enclose "underscore" "__"))
   (keymap-set keymap "h" #'plantuml-enclose-color)
   (keymap-set keymap "s" #'plantuml-enclose-size)
   (keymap-set keymap "u" #'plantuml-unenclose-tag))
