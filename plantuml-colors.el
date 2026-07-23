@@ -1,12 +1,21 @@
-;;; plantuml-colors.el -- Plantuml color constants -*- lexical-binding: t -*-
+;;; plantuml-colors.el --- Insert colors sprite  -*- lexical-binding: t; -*-
 
-;; color codes extracted from https://www.w3.org/wiki/CSS/Properties/color/keywords
+;; Author: shyam
+;;; Commentary:
+
+;; Insert colors sprite for PlantUML
+
+;;; Code:
+
+;; color codes extracted from plantuml `color'
 (defconst plantuml--colors
-  '(("aliceblue" . "#f0f8ff")
+  '(("application" . "#c2f0ff")
+    ("aliceblue" . "#f0f8ff")
     ("antiquewhite" . "#faebd7")
     ("aqua" . "#00ffff")
     ("aquamarine" . "#7fffd4")
     ("azure" . "#f0ffff")
+    ("business" . "#ffffcc")
     ("beige" . "#f5f5dc")
     ("bisque" . "#ffe4c4")
     ("black" . "#000000")
@@ -32,7 +41,6 @@
     ("darkkhaki" . "#bdb76b")
     ("darkmagenta" . "#8b008b")
     ("darkolivegreen" . "#556b2f")
-    ("darkorange" . "#ff8c00")
     ("darkorchid" . "#9932cc")
     ("darkred" . "#8b0000")
     ("darksalmon" . "#e9967a")
@@ -42,6 +50,7 @@
     ("darkslategrey" . "#2f4f4f")
     ("darkturquoise" . "#00ced1")
     ("darkviolet" . "#9400d3")
+    ("darkorange" . "#ff8c00")
     ("deeppink" . "#ff1493")
     ("deepskyblue" . "#00bfff")
     ("dimgray" . "#696969")
@@ -61,6 +70,7 @@
     ("grey" . "#808080")
     ("honeydew" . "#f0fff0")
     ("hotpink" . "#ff69b4")
+    ("implementation" . "#ffe0e0")
     ("indianred" . "#cd5c5c")
     ("indigo" . "#4b0082")
     ("ivory" . "#fffff0")
@@ -87,12 +97,13 @@
     ("lime" . "#00ff00")
     ("limegreen" . "#32cd32")
     ("linen" . "#faf0e6")
+    ("motivation" . "#ccccff")
     ("magenta" . "#ff00ff")
     ("maroon" . "#800000")
     ("mediumaquamarine" . "#66cdaa")
     ("mediumblue" . "#0000cd")
     ("mediumorchid" . "#ba55d3")
-    ("mediumpurple" . "#9370db")
+    ("mediumpurple" . "#9370d8")
     ("mediumseagreen" . "#3cb371")
     ("mediumslateblue" . "#7b68ee")
     ("mediumspringgreen" . "#00fa9a")
@@ -110,10 +121,11 @@
     ("orange" . "#ffa500")
     ("orangered" . "#ff4500")
     ("orchid" . "#da70d6")
+    ("physical" . "#97ff97")
     ("palegoldenrod" . "#eee8aa")
     ("palegreen" . "#98fb98")
     ("paleturquoise" . "#afeeee")
-    ("palevioletred" . "#db7093")
+    ("palevioletred" . "#d87093")
     ("papayawhip" . "#ffefd5")
     ("peachpuff" . "#ffdab9")
     ("peru" . "#cd853f")
@@ -124,6 +136,7 @@
     ("red" . "#ff0000")
     ("rosybrown" . "#bc8f8f")
     ("royalblue" . "#4169e1")
+    ("strategy" . "#f8e7c0")
     ("saddlebrown" . "#8b4513")
     ("salmon" . "#fa8072")
     ("sandybrown" . "#f4a460")
@@ -138,6 +151,7 @@
     ("snow" . "#fffafa")
     ("springgreen" . "#00ff7f")
     ("steelblue" . "#4682b4")
+    ("technology" . "#c9ffc9")
     ("tan" . "#d2b48c")
     ("teal" . "#008080")
     ("thistle" . "#d8bfd8")
@@ -149,8 +163,7 @@
     ("whitesmoke" . "#f5f5f5")
     ("yellow" . "#ffff00")
     ("yellowgreen" . "#9acd32"))
-  "Plantuml predefined colors")
-
+  "colors sprite names for PlantUML")
 
 (defconst plantuml--color-names
   (mapcar #'car plantuml--colors)
@@ -165,4 +178,4 @@ or if in the form of #ffffff return that"
       (cdr (assoc name plantuml--colors)))))
 
 (provide 'plantuml-colors)
-;;; plantuml-colors.el -- Ends here
+;;; plantuml-colors.el
