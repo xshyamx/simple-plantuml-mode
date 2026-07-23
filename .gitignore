@@ -1,3 +1,7 @@
 .*
 !.gitignore
 *.elc
+/scripts/*.el
+!/scripts/generate-*.el
+/work
+*.jar

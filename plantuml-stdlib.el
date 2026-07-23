@@ -35,7 +35,7 @@
   (let ((inserted nil) (common nil) (p nil)
 	(common-include (plantuml-stdlib--common-include library))
 	(name (car component))
-	(component-include (cdr component)))
+	(component-include (concat (cdr component) "/" (car component))))
 
     ;; common-include present
     (save-excursion
