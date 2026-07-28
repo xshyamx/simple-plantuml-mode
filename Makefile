@@ -11,11 +11,16 @@ AWSEL = plantuml-stdlib-aws.el
 AZEL  = plantuml-stdlib-azure.el
 GCPEL = plantuml-stdlib-gcp.el
 
+BUILDDIR = $(WORKDIR)/classes
+
 compile:
 	emacs -Q --batch -L . -f batch-byte-compile *.el
 
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
 clean:
-	rm -f *.elc plantuml-mode-autoloads.el $(KWEL) $(OIEL) $(CLEL) $(AWSEL) $(AZEL) $(GCPEL)
+	rm -rf *.elc $(WORKDIR) plantuml-mode-autoloads.el
 
 autoloads:
 	emacs -Q -L . -l compile -l package --batch \
@@ -52,20 +57,23 @@ $(GCPEL): $(STDLIB_BASE)/gcp
 clean-work:
 	rm -fr $(WORKDIR)
 
+EXTRACT_CLASS = ExtractPumlSpm
+EXTRACT_JAVA  = scripts/$(EXTRACT_CLASS).java
+EXTRACT_CP    = $(PUML_JAR):$(BUILDDIR)
+
 $(STDLIB_BASE):
 	mkdir -p $(WORKDIR)
 	cd $(WORKDIR) ; jar xf $(PUML_JAR) stdlib META-INF
 	mv $(STDLIB_BASE) $(WORKDIR)/spm
 
-prepare:
-	uv venv --clear
-	uv pip install --system-certs -r ./scripts/requirements.txt
+$(BUILDDIR)/$(EXTRACT_CLASS).class: $(EXTRACT_JAVA) $(BUILDDIR)
+	javac -cp $(PUML_JAR) -d $(BUILDDIR) $(EXTRACT_JAVA)
 
-$(STDLIB_BASE)/awslib20: $(STDLIB_BASE) prepare
-	uv run ./scripts/extract_puml_spm.py $(WORKDIR)/spm/awslib20 $(STDLIB_BASE)
+$(STDLIB_BASE)/awslib20: $(STDLIB_BASE) $(BUILDDIR)/$(EXTRACT_CLASS).class
+	java -cp $(EXTRACT_CP) $(EXTRACT_CLASS) $(WORKDIR)/spm/awslib20 $(STDLIB_BASE)
 
-$(STDLIB_BASE)/gcp: $(STDLIB_BASE) prepare
-	uv run ./scripts/extract_puml_spm.py $(WORKDIR)/spm/gcp $(STDLIB_BASE)
+$(STDLIB_BASE)/gcp: $(STDLIB_BASE) $(BUILDDIR)/$(EXTRACT_CLASS).class
+	java -cp $(EXTRACT_CP) $(EXTRACT_CLASS) $(WORKDIR)/spm/gcp $(STDLIB_BASE)
 
-$(STDLIB_BASE)/azure: $(STDLIB_BASE) prepare
-	uv run ./scripts/extract_puml_spm.py $(WORKDIR)/spm/azure $(STDLIB_BASE)
+$(STDLIB_BASE)/azure: $(STDLIB_BASE) $(BUILDDIR)/$(EXTRACT_CLASS).class
+	java -cp $(EXTRACT_CP) $(EXTRACT_CLASS) $(WORKDIR)/spm/azure $(STDLIB_BASE)
