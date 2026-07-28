@@ -49,7 +49,8 @@
 
 (keymap-set plantuml-mode-map \"C-c o\" #'plantuml-insert-icon)
 ")
-	(nl "\n"))
+	(nl "\n")
+	(inhibit-message t))
     (with-temp-buffer
       (erase-buffer)
       (insert preamble)
