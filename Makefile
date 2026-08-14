@@ -1,6 +1,7 @@
 .PHONY: compile clean autoloads test generate
 
-PUML_JAR ?= $(shell pwd)/plantuml.jar
+PUML_VERSION ?= 1.2026.6
+PUML_JAR ?= $(shell pwd)/plantuml-$(PUML_VERSION).jar
 
 KWEL = plantuml-keywords.el
 OIEL = plantuml-openiconic.el
@@ -31,6 +32,9 @@ test:
 	-l plantuml-mode.el \
 	-l test/plantuml-mode-test.el \
 	-f ert-run-tests-batch-and-exit
+
+clean-generated:
+	rm -f $(KWEL) $(OIEL) $(CLEL) $(AWSEL) $(AZEL) $(GCPEL)
 
 generate: $(KWEL) $(OIEL) $(CLEL) stdlib
 
@@ -77,3 +81,10 @@ $(STDLIB_BASE)/gcp: $(STDLIB_BASE) $(BUILDDIR)/$(EXTRACT_CLASS).class
 
 $(STDLIB_BASE)/azure: $(STDLIB_BASE) $(BUILDDIR)/$(EXTRACT_CLASS).class
 	java -cp $(EXTRACT_CP) $(EXTRACT_CLASS) $(WORKDIR)/spm/azure $(STDLIB_BASE)
+
+plantuml-$(PUML_VERSION).jar:
+	mvn dependency:get \
+		-DgroupId=net.sourceforge.plantuml \
+		-DartifactId=plantuml \
+		-Dversion=$(PUML_VERSION)
+	cp $(HOME)/.m2/repository/net/sourceforge/plantuml/plantuml/$(PUML_VERSION)/plantuml-$(PUML_VERSION).jar .

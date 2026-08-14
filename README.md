@@ -1,4 +1,4 @@
-# Simple PlantUML Mode #
+# Simple PlantUML Mode
 
 Major mode for [PlantUML](https://plantuml.com/) files.
 
@@ -34,7 +34,7 @@ Adds the following keybindings
 | <kbd>C-j</kbd> | Expand special like emmet mode (Alternate <kbd>C-&lt;return&gt;</kbd>). Use <kbd>C-u</kbd> for dashed & <kbd>C-u C-u</kbd> for dotted |
 | <kbd>C-c '</kbd> | Open included file when invoked from line with `!include` directive |
 
-## Why? ##
+## Why?
 
 While there is already an excellent [plantuml-mode](https://github.com/skuro/plantuml-mode/) available what is the reason of this package existing?
 
@@ -45,7 +45,7 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 - Wanted jump-to-definition & list-references within the file
 - Wanted to save the generated diagrams instead of having to manually save them each time
 
-## Nice to have features ##
+## Nice to have features
 
 - Imenu listings for component definitions
 - Simple emmet-mode like completions for relationships eg. `a->b,c<-d`
@@ -103,15 +103,15 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 - Add PlantUML fragments for header, title, footer and file name slug comment from prefix `C-c a`
 - Enclose selection in PlantUML with creole tags (color & size) from prefix `C-c e`
 
-## Installation ##
+## Installation
 
-### Pre-requisites ###
+### Pre-requisites
 
 1. Ensure a compatible Java Runtime Environment (JRE) is installed
 
 2. Install the latest PlantUML jar file from https://github.com/plantuml/plantuml
 
-### For Emacs ###
+### For Emacs
 
 1. Clone the repository into site-lisp in the emacs user directory
 
@@ -137,3 +137,16 @@ While there is already an excellent [plantuml-mode](https://github.com/skuro/pla
 		  (expand-file-name
 		   "~/.m2/repository/net/sourceforge/plantuml/plantuml/1.2022.12/plantuml-1.2022.12.jar"))
 	```
+
+## Build & Run
+
+Makefile targets
+
+| Target | Description |
+|----|---|
+| compile | Batch compile |
+| clean | Remove elc files  |
+| clean-generated | Remove generated files  |
+| clean-work | Remove work directory  |
+| stdlib | Generate aws, azure & gcp stdlib |
+| generate | Generate keyworkds, openiconic, colors & stdlib |
